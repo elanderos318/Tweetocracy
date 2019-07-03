@@ -1,0 +1,23 @@
+/* .rightBox {
+    position: relative;
+    left: 250px;
+    top: -200px;
+} */
+
+/* .checkBoxes {
+    height: 200px;
+} */
+/* 
+.form {
+    height: 200px;
+} */
+#column1 {
+    float: left !important;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+#column2 {
+    float: left !important;
+    padding-left: 10px;
+    padding-right: 10px;
+}
