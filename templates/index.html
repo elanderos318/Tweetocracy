@@ -1,278 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
-		<title>Tweetocracy Graphs</title>
-		<link rel="stylesheet" type="text/css" href="../static/assets/css/style.css">
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
-		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script> -->
-	</head>
-	<body>
-		<form class = "form">
-			<fieldset class = "checkboxes">
-				<legend>Choose Candidates</legend>
-				<div id = "column1">
-					<div  class = "btn-group btn-group-toggle" data-toggle = "buttons">
-						<label class="btn btn-secondary active">
-						<input type = "checkbox" class = "Joe-Biden-box box" name = "JoeBiden" checked autocomplete = "off">
-						Joe Biden</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Cory-Booker-box box" name = "CoryBooker">
-						<label for = "Cory-Booker-box">Cory Booker</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Pete-Buttigieg-box box" name = "PeteButtigieg">
-						<label for = "Pete-Buttigieg-box">Pete Buttigieg</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Julian-Castro-box box" name = "JulianCastro">
-						<label for = "Julian-Castro-box">Julian Castro</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "John-Delaney-box box" name = "JohnDelaney">
-						<label for = "John-Delaney-box">John Delaney</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Tulsi-Gabbard-box box" name = "TulsiGabbard">
-						<label for = "Tulsi-Gabbard-box">Tulsi Gabbard</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Kirsten-Gillibrand-box box" name = "KirstenGillibrand">
-						<label for = "Kirsten-Gillibrand-box">Kirsten Gillibrand</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Mike-Gravel-box box" name = "MikeGravel">
-						<label for = "Mike-Gravel-box">Mike Gravel</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Kamala-Harris-box box" name = "KamalaHarris">
-						<label for = "Kamala-Harris-box">Kamala Harris</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "John-Hickenlooper-box box" name = "JohnHickenlooper">
-						<label for = "John-Hickenlooper-box">John Hickenlooper</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Jay-Inslee-box box" name = "JayInslee">
-						<label for = "Jay-Inslee-box">Jay Inslee</label>
-					</div>
-				</div>
-				<div id = "column2">
-					<div>
-						<input type = "checkbox" class = "Amy-Klobuchar-box box rightBox" name = "AmyKlobuchar">
-						<label for = "Amy-Klobuchar-box" class = "rightBox">Amy Klobuchar</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Wayne-Messam-box box rightBox" name = "WayneMessam">
-						<label for = "Wayne-Messam-box" class = "rightBox">Wayne Messam</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Seth-Moulton-box box rightBox" name = "SethMoulton">
-						<label for = "Seth-Moulton-box" class = "rightBox">Seth Moulton</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Beto-Rourke-box box rightBox" name = "BetoO'Rourke">
-						<label for = "Beto-Rourke-box" class = "rightBox">Beto O'Rourke</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Tim-Ryan-box box rightBox" name = "TimRyan">
-						<label for = "Tim-Ryan-box" class = "rightBox">Tim Ryan</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Bernie-Sanders-box box rightBox" name = "BernieSanders">
-						<label for = "Bernie-Sanders-box" class = "rightBox">Bernie Sanders</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Donald-Trump-box box rightBox" name = "DonaldTrump">
-						<label for = "Donald-Trump-box" class = "rightBox">Donald Trump</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Elizabeth-Warren-box box rightBox" name = "ElizabethWarren">
-						<label for = "Elizabeth-Warren-box" class = "rightBox">Elizabeth Warren</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Bill-Weld-box box rightBox" name = "BillWeld">
-						<label for = "Bill-Weld-box" class = "rightBox">Bill Weld</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Marianne-Williamson-box box rightBox" name = "MarianneWilliamson">
-						<label for = "Marianne-Williamson-box" class = "rightBox">Marianne Williamson</label>
-					</div>
-					<div>
-						<input type = "checkbox" class = "Andrew-Yang-box box rightBox" name = "AndrewYang">
-						<label for = "Andrew-Yang-box" class = "rightBox">Andrew Yang</label>
-					</div>
-				</div>
-			</fieldset>
-			<fieldset>
-				<legend>Choose Y Variable</legend>
-				<div>
-					<input type="radio" id="engagement" class = "y-value" name="y-value" value="engagement" checked>
-					<label for="engagement">Engagement Score</label>
-				</div>
-				<div>
-					<input type="radio" id="retweets"  class = "y-value" name="y-value" value="retweets">
-					<label for="retweets">Retweets</label>
-				</div>
-				<div>
-					<input type="radio" id="favorites" class = "y-value" name="y-value" value="favorites">
-					<label for="favorites">Favorites</label>
-				</div>
-				<div>
-					<input type="radio" id="comments" class = "y-value" name="y-value" value="comments">
-					<label for="comments">Comments</label>
-				</div>
-			</fieldset>
-			<button id="filter-btn" type = "submit" class = "btn btn-default">Show Data</button>
-		</form>
-		<div class="chart1">
-		</div>
-		<br>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>Tweetocracy</title>
 
-		<form class = "form">
-			<fieldset class = "checkboxes">
-				<legend>Choose A Candidate</legend>
-				<div id = "column1">
-					<div>
-						<input type = "radio" class = "Joe-Biden-radio radio hour-day-radio" name = "hour-day-candidate" value = "Joe Biden" checked>
-						<label for = "Joe-Biden-radio">Joe Biden</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Cory-Booker-radio radio hour-day-radio" name = "hour-day-candidate" value = "Cory Booker">
-						<label for = "Cory-Booker-radio">Cory Booker</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Pete-Buttigieg-radio radio hour-day-radio" name = "hour-day-candidate" value = "Pete Buttigieg">
-						<label for = "Pete-Buttigieg-radio">Pete Buttigieg</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Julian-Castro-radio radio hour-day-radio" name = "hour-day-candidate" value = "Julián Castro">
-						<label for = "Julian-Castro-radio">Julian Castro</label>
-					</div>
-					<div>
-						<input type = "radio" class = "John-Delaney-radio radio hour-day-radio" name = "hour-day-candidate" value = "John Delaney">
-						<label for = "John-Delaney-radio">John Delaney</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Tulsi-Gabbard-radio radio hour-day-radio" name = "hour-day-candidate" value = "Tulsi Gabbard">
-						<label for = "Tulsi-Gabbard-radio">Tulsi Gabbard</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Kirsten-Gillibrand-radio radio hour-day-radio" name = "hour-day-candidate" value = "Kirsten Gillibrand">
-						<label for = "Kirsten-Gillibrand-radio">Kirsten Gillibrand</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Mike-Gravel-radio radio hour-day-radio" name = "hour-day-candidate" value = "Mike Gravel">
-						<label for = "Mike-Gravel-radio">Mike Gravel</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Kamala-Harris-radio radio hour-day-radio" name = "hour-day-candidate" value = "Kamala Harris">
-						<label for = "Kamala-Harris-radio">Kamala Harris</label>
-					</div>
-					<div>
-						<input type = "radio" class = "John-Hickenlooper-radio radio hour-day-radio" name = "hour-day-candidate" value = "John Hickenlooper">
-						<label for = "John-Hickenlooper-radio">John Hickenlooper</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Jay-Inslee-radio radio hour-day-radio" name = "hour-day-candidate" value = "Jay Inslee">
-						<label for = "Jay-Inslee-radio">Jay Inslee</label>
-					</div>
-				</div>
-				<div id = "column2">
-					<div>
-						<input type = "radio" class = "Amy-Klobuchar-radio radio hour-day-radio" name = "hour-day-candidate" value = "Amy Klobuchar">
-						<label for = "Amy-Klobuchar-radio" class = "rightBox">Amy Klobuchar</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Wayne-Messam-radio radio hour-day-radio" name = "hour-day-candidate" value = "Wayne Messam">
-						<label for = "Wayne-Messam-radio" class = "rightBox">Wayne Messam</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Seth-Moulton-radio radio hour-day-radio" name = "hour-day-candidate" value = "Seth Moulton">
-						<label for = "Seth-Moulton-radio" class = "rightBox">Seth Moulton</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Beto-Rourke-radio radio hour-day-radio" name = "hour-day-candidate" value = "Beto O'Rourke">
-						<label for = "Beto-Rourke-radio" class = "rightBox">Beto O'Rourke</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Tim-Ryan-radio radio hour-day-radio" name = "hour-day-candidate" value = "Tim Ryan">
-						<label for = "Tim-Ryan-radio" class = "rightBox">Tim Ryan</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Bernie-Sanders-radio radio hour-day-radio" name = "hour-day-candidate" value = "Bernie Sanders">
-						<label for = "Bernie-Sanders-radio" class = "rightBox">Bernie Sanders</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Donald-Trump-radio radio hour-day-radio" name = "hour-day-candidate" value = "Donald Trump">
-						<label for = "Donald-Trump-radio" class = "rightBox">Donald Trump</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Elizabeth-Warren-radio radio hour-day-radio" name = "hour-day-candidate" value = "Elizabeth Warren">
-						<label for = "Elizabeth-Warren-radio" class = "rightBox">Elizabeth Warren</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Bill-Weld-radio radio hour-day-radio" name = "hour-day-candidate" value = "Bill Weld">
-						<label for = "Bill-Weld-radio" class = "rightBox">Bill Weld</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Marianne-Williamson-radio radio hour-day-radio" name = "hour-day-candidate" value = "Marianne Williamson">
-						<label for = "Marianne-Williamson-radio" class = "rightBox">Marianne Williamson</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Andrew-Yang-radio radio hour-day-radio" name = "hour-day-candidate" value = "Andrew Yang">
-						<label for = "Andrew-Yang-radio" class = "rightBox">Andrew Yang</label>
-					</div>
-				</div>
-			</fieldset>
-			<fieldset>
-				<legend>Choose Hour/Weekday</legend>
-				<div>
-					<input type="radio" id="hour" class = "y-value hour-day-selection" name="hour-day" value="hour" checked>
-					<label for="hour">Hour</label>
-				</div>
-				<div>
-					<input type="radio" id="day"  class = "y-value hour-day-selection" name="hour-day" value="day">
-					<label for="day">Day</label>
-				</div>
-			</fieldset>
-		</form>
-		<div class = "chart2">
-		</div>
-		<br>
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+<body>
+  <nav class="blue darken-4" role="navigation">
+    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Tweetocracy!</a>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="#">Navbar Link</a></li>
+      </ul>
 
-		<form class = "form">
-			<fieldset class = "checkboxes">
-				<legend>Choose A Candidate</legend>
-				<div id = "column1">
-					<div>
-						<input type = "radio" class = "Pete-Buttigieg-radio radio sentiment-engagement-radio" name = "sentiment-engagement" value = "Pete Buttigieg">
-						<label for = "Pete-Buttigieg-radio">Pete Buttigieg</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Tulsi-Gabbard-radio radio sentiment-engagement-radio" name = "sentiment-engagement" value = "Tulsi Gabbard">
-						<label for = "Tulsi-Gabbard-radio">Tulsi Gabbard</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Kamala-Harris-radio radio sentiment-engagement-radio" name = "sentiment-engagement" value = "Kamala Harris">
-						<label for = "Kamala-Harris-radio">Kamala Harris</label>
-					</div>
-				</div>
-				<div id = "column2">
-						<input type = "radio" class = "Bernie-Sanders-radio radio sentiment-engagement-radio" name = "sentiment-engagement" value = "Bernie Sanders" checked>
-						<label for = "Bernie-Sanders-radio" class = "rightBox">Bernie Sanders</label>
-					</div>
-					<div>
-						<input type = "radio" class = "Donald-Trump-radio radio sentiment-engagement-radio" name = "sentiment-engagement" value = "Donald Trump">
-						<label for = "Donald-Trump-radio" class = "rightBox">Donald Trump</label>
-					</div>
-				</div>
-			</fieldset>
-		</form>
-		<div class = "chart3">
-		</div>
-		<script type="text/javascript" src="../static/js/app.js"></script>
+      <ul id="nav-mobile" class="sidenav">
+        <li><a href="#">Navbar Link</a></li>
+      </ul>
+      <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+    </div>
+  </nav>
+
+  <div class="slider">
+    <ul class="slides">
+      <li>
+        <img src="https://lorempixel.com/580/250/nature/1"> <!-- random image -->
+        <div class="caption center-align">
+          <h3>This is our big Tagline!</h3>
+          <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+      <li>
+        <img src="https://lorempixel.com/580/250/nature/2"> <!-- random image -->
+        <div class="caption left-align">
+          <h3>Left Aligned Caption</h3>
+          <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+      <li>
+        <img src="https://lorempixel.com/580/250/nature/3"> <!-- random image -->
+        <div class="caption right-align">
+          <h3>Right Aligned Caption</h3>
+          <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+      <li>
+        <img src="https://lorempixel.com/580/250/nature/4"> <!-- random image -->
+        <div class="caption center-align">
+          <h3>This is our big Tagline!</h3>
+          <h5 class="light grey-text text-lighten-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+
+  <div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+      <br><br>
+      <h3 class="header center blue-text">The New Age of Media Outreach</h1>
+      <div class="row center">
+        <h5 class="header header-description col s12 light">Over the past years, social media has had an increasing influence over American politics and elections. Social media allows candidates to bypass the traditional gatekeepers of mainstream media companies by talking directly to users. Attention-grabbing tactics, heated rhetoric, breaking scandals, etc. have made impressions on millions of people on social media - as the 2020 presidential elections approaches, there is no longer any doubt in the minds of candidates and campaign staffers of the necessity of establishing a strong and impactful presence online.</h5>
+      </div>
+      <!-- <div class="row center">
+        <a href="http://materializecss.com/getting-started.html" id="download-button" class="btn-large waves-effect waves-light orange">Get Started</a>
+      </div> -->
+      <br><br>
+
+    </div>
+  </div>
+
+  <footer class="page-footer blue darken-4">
+    <div class="container">
+      <div class="row">
+        <div class="col s8 offset-s2">
+          <h5 class="white-text">About The Project</h5>
+          <p class="grey-text text-lighten-4">The project explores data from the Twitter accounts of 2020 candidates for the presidency of the United States.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container">
+      Made by <span class="orange-text text-lighten-3">Eduardo Landeros</a>
+      </div>
+    </div>
+  </footer>
+
+
+  <!--  Scripts-->
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="js/materialize.js"></script>
+  <script src="js/init.js"></script>
+
   </body>
 </html>

@@ -1,16 +1,3 @@
-/* .rightBox {
-    position: relative;
-    left: 250px;
-    top: -200px;
-} */
-
-/* .checkBoxes {
-    height: 200px;
-} */
-/* 
-.form {
-    height: 200px;
-} */
 #column1 {
     float: left !important;
     padding-left: 10px;
@@ -20,4 +7,25 @@
     float: left !important;
     padding-left: 10px;
     padding-right: 10px;
+}
+
+
+.icon-block {
+    padding: 0 15px;
+  }
+.icon-block .material-icons {
+    font-size: inherit;
+}
+
+/* Add weight to project title */
+#logo-container {
+font-weight: 700;
+}
+
+.header {
+font-weight: 600;
+}
+
+.sub-header {
+font-weight: 400;
 }
