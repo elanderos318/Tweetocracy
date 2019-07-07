@@ -10,6 +10,10 @@
 }
 
 
+body {
+    background-color: #f1f4df;
+}
+
 .icon-block {
     padding: 0 15px;
   }
