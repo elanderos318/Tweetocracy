@@ -14,6 +14,10 @@ body {
     background-color: #f1f4df;
 }
 
+.context-header {
+    margin-left: 5%;
+}
+
 .icon-block {
     padding: 0 15px;
   }
