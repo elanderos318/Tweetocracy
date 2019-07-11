@@ -110,4 +110,4 @@ ENV/
 node_modules/
 
 # config.py
-.config
+config.py
