@@ -11,11 +11,27 @@
 
 
 body {
-    background-color: #f1f4df;
+    background-color: #e8f5fd;
 }
 
 .context-header {
     margin-left: 5%;
+}
+
+.twitter-button {
+    background: url("../images/sign-in-with-twitter-gray.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 16em;
+    height: 3em;
+}
+
+
+.embedded-image {
+    /* height: auto;
+    max-width: 100%; */
+    /* padding: 0px 0px 0px 0px; */
+    /* display: block; */
 }
 
 .icon-block {
