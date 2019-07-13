@@ -18,20 +18,20 @@ body {
     margin-left: 5%;
 }
 
-.button-image {
-    background-image: url("../static/assets/images/sign-in-with-twitter-gray.png");
+.twitter-button {
+    background: url("../images/sign-in-with-twitter-gray.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 16em;
+    height: 3em;
 }
 
-.twitter-button {
-    height: auto;
-}
 
 .embedded-image {
-    height: auto;
-    max-width: 100%;
-    padding: 0px 0px 0px 0px;
-    margin: 0px 0px 0px 0px;
-    display: block;
+    /* height: auto;
+    max-width: 100%; */
+    /* padding: 0px 0px 0px 0px; */
+    /* display: block; */
 }
 
 .icon-block {
