@@ -145,8 +145,8 @@ def request_token():
     # token_response_df = pd.DataFrame(token_response_dict)
     # token_response_json = token_response_df.to_json(orient='records')
     # token_response_dumps = json.dumps(token_response_dict)
-    # return(jsonify(**token_response_dict))
-    return(jsonify(name = oauth_token))
+    return(jsonify(**token_response_dict))
+    # return(jsonify(name = oauth_token))
 
 @app.route("/candidates_tweets")
 def candidates_tweets():
