@@ -1,5 +1,7 @@
 import os
 
+import json
+
 import requests
 from requests_oauthlib import OAuth1
 
@@ -133,6 +135,18 @@ sentiment_json = sentiment_df.to_json(orient='records')
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/request_token')
+def request_token():
+    print(oauth_token)
+    print("yes")
+    token_response_dict = {"oauth_token": oauth_token}
+    print(jsonify(**token_response_dict))
+    # token_response_df = pd.DataFrame(token_response_dict)
+    # token_response_json = token_response_df.to_json(orient='records')
+    # token_response_dumps = json.dumps(token_response_dict)
+    # return(jsonify(**token_response_dict))
+    return(jsonify(name = oauth_token))
 
 @app.route("/candidates_tweets")
 def candidates_tweets():
