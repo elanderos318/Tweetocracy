@@ -14,9 +14,10 @@ import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import create_engine
 
-from flask import Flask, jsonify, render_template, request, redirect, url_for
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/candidates_tweets.sqlite"
 
@@ -60,29 +61,35 @@ auth = OAuth1(ck, cs, at, ats)
 
 callback_url = "https://tweetocracy.herokuapp.com/"
 
+# payload = {
+#     'oauth_callback':callback_url
+# }
+
+# local testing
+
 payload = {
-    'oauth_callback':callback_url
+    'oauth_callback':"http://127.0.0.1:5000/"
 }
 
 r = requests.post('https://api.twitter.com/oauth/request_token', auth = auth, data = payload)
 
-print(r.url)
+# print(r.url)
 
-print(r.status_code)
+# print(r.status_code)
 
-print(r.text)
+# print(r.text)
 
 response_output = r.text
 response_parameters = response_output.split("&")
 
-print(response_parameters)
+# print(response_parameters)
 
 oauth_token = response_parameters[0][12:]
-print(oauth_token)
+# print(oauth_token)
 oauth_token_secret=response_parameters[1][19:]
-print(oauth_token_secret)
+# print(oauth_token_secret)
 oauth_callback_confirmed = bool(response_parameters[2][25:])
-print(oauth_callback_confirmed)
+# print(oauth_callback_confirmed)
 
 #### Tweet DataSet
 tweets_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_tweets").fetchall())
@@ -134,14 +141,12 @@ sentiment_json = sentiment_df.to_json(orient='records')
 #Set up routes
 @app.route('/')
 def index():
-    query_string = request.query_string
-    print(query_string)
 
     request_token = request.args.get("oauth_token")
-    print(request_token)
+    # print(request_token)
     oauth_verifier = request.args.get("oauth_verifier")
-    print(oauth_verifier)
-    print(request_token == oauth_token)
+    # print(oauth_verifier)
+    # print(request_token == oauth_token)
 
     if request_token == oauth_token and oauth_verifier:
 
@@ -154,16 +159,33 @@ def index():
         r_access = requests.post("https://api.twitter.com/oauth/access_token", auth = auth_access, data = payload_access)
         r_access_text = r_access.text
 
-        if r_access.status_code == 200:
-            return redirect(url_for('test'))
-        else:
-            return redirect(url_for('fail'))
+        # print(r_access.status_code)
+        # print(r_access_text)
+
+        post_access_params = r_access_text.split("&")
+
+        access_token = post_access_params[0][12:]
+        access_token_secret = post_access_params[1][19:]
+        user_id = post_access_params[2][8:]
+        screen_name = post_access_params[3][12:]
+
+        session["username"] = screen_name
+
+        # print(access_token)
+        # print(access_token_secret)
+        # print(user_id)
+        # print(screen_name)
+
+        # if r_access.status_code == 200:
+        #     return redirect(url_for('test'))
+        # else:
+        #     return redirect(url_for('fail'))
 
     return render_template('index.html')
 
 @app.route('/test')
 def test():
-    return 'Success! Text: {{ r_access_text }} '
+    return 'Success! Text:'
 @app.route('/fail')
 def fail():
     return 'Fail!'
