@@ -61,6 +61,9 @@ auth = OAuth1(ck, cs, at, ats)
 
 callback_url = "https://tweetocracy.herokuapp.com/"
 
+# declare variable
+# oauth_token = "_"
+
 # payload = {
 #     'oauth_callback':callback_url
 # }
@@ -73,23 +76,23 @@ payload = {
 
 r = requests.post('https://api.twitter.com/oauth/request_token', auth = auth, data = payload)
 
-# print(r.url)
+print(r.url)
 
-# print(r.status_code)
+print(r.status_code)
 
-# print(r.text)
+print(r.text)
 
 response_output = r.text
 response_parameters = response_output.split("&")
 
-# print(response_parameters)
+print(response_parameters)
 
 oauth_token = response_parameters[0][12:]
-# print(oauth_token)
+print(oauth_token)
 oauth_token_secret=response_parameters[1][19:]
-# print(oauth_token_secret)
+print(oauth_token_secret)
 oauth_callback_confirmed = bool(response_parameters[2][25:])
-# print(oauth_callback_confirmed)
+print(oauth_callback_confirmed)
 
 #### Tweet DataSet
 tweets_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_tweets").fetchall())
@@ -142,13 +145,18 @@ sentiment_json = sentiment_df.to_json(orient='records')
 @app.route('/')
 def index():
 
+    query_string = request.query_string
+    print(query_string.decode())
+    print(type(query_string.decode()))
     request_token = request.args.get("oauth_token")
-    # print(request_token)
+    print(request_token)
+    # print(type(request_token))
+    # print(oauth_token)
     oauth_verifier = request.args.get("oauth_verifier")
-    # print(oauth_verifier)
-    # print(request_token == oauth_token)
 
     if request_token == oauth_token and oauth_verifier:
+
+        print("works!")
 
         auth_access = OAuth1(ck, cs, request_token, ats)
 
@@ -163,6 +171,8 @@ def index():
         # print(r_access_text)
 
         post_access_params = r_access_text.split("&")
+
+        print(post_access_params)
 
         access_token = post_access_params[0][12:]
         access_token_secret = post_access_params[1][19:]
@@ -192,6 +202,26 @@ def fail():
 
 @app.route('/request_token')
 def request_token():
+
+    # production callback
+    # callback_url = "https://tweetocracy.herokuapp.com/"
+
+    # local testing
+    # payload = {
+    # 'oauth_callback':"http://127.0.0.1:5000/"
+    # }
+
+    # r = requests.post('https://api.twitter.com/oauth/request_token', auth = auth, data = payload)
+
+    # response_output = r.text
+    # print(response_output)
+    # response_parameters = response_output.split("&")
+
+    # oauth_token = response_parameters[0][12:]
+    # print(oauth_token)
+    # oauth_token_secret = response_parameters[1][19:]
+    # oauth_callback_confirmed = bool(response_parameters[2][25:])
+
     # print(oauth_token)
     token_response_dict = {"oauth_token": oauth_token}
     return(jsonify(**token_response_dict))
