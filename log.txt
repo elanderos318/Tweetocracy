@@ -8,3 +8,14 @@ Today, I had a thought that keeping track of my progress on this app would be us
 -- Encryption methods established
 -- Attempted to establish the "Sign in with Twitter" button on the template. Button is deployed but needs styling revisions
 -- Dove into Flask documentation, mainly to learn about session handling. Still need to establish method for storing access keys during authorization
+
+2019.07.13
+-- "post request" step for oauth1 implemented successfully. Starts on app initialization. variables stored in memory while server connection is established
+-- appears as though Twitter request tokens expire quickly. Need to implement method for refreshing tokens, or need to figure out what exactly causing the expiration
+-- Finalized Twitter button styling, "background-size: cover" was the solution for clean formatting it appears
+-- added app2.js file for interaction with button. App had trouble establishing online connection with D3 library. Solution was to download the d3.js files on local path
+-- implemented the "get authorize" method for OAuth1. Needed to redirect to Twitter website for authorization, then returns oauth_verifier as a query string on the callback. Not difficult to store parameteres as variables
+-- Tried to complete the OAuth1 process with the "post access" step. Appears to have been succussful, however,
+-- It appears OAuth1 will make app testing difficult. Since the callback goes to the deployed website, the local server does not have access to the parameters Twitter sends back. Setting the callback as the local server seems not feasible/ill-advised. I will need to find a working solution for this, since constantly updating the deployed application for testing purposes is unwieldy and time-consuming.
+-- OAuth1 is very time-consuming and a pain in the ***. Luckily it appears I won't need to manually set up the parameters thanks to a handy module
+
