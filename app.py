@@ -151,7 +151,7 @@ def index():
             'oauth_verifier':oauth_verifier
         }
 
-        r_access = requests.post("https://api.twitter.com/oauth/access_token", auth = auth, data = payload_access)
+        r_access = requests.post("https://api.twitter.com/oauth/access_token", auth = auth_access, data = payload_access)
 
         if r_access.status_code == 200:
             return redirect(url_for('test'))
