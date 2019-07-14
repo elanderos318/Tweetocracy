@@ -14,7 +14,7 @@ import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import create_engine
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
@@ -142,7 +142,29 @@ def index():
     oauth_verifier = request.args.get("oauth_verifier")
     print(oauth_verifier)
     print(request_token == oauth_token)
+
+    if request_token == oauth_token and oauth_verifier:
+
+        payload_access = {
+            'oauth_token':request_token,
+            'oauth_verifier':oauth_verifier
+        }
+
+        r_access = requests.post("https://api.twitter.com/oauth/access_token", auth = auth, data = payload_access)
+
+        if r_access.status_code == 200:
+            return redirect(url_for('test'))
+        else:
+            return redirect(url_for('fail'))
+
     return render_template('index.html')
+
+@app.route('/test')
+def test():
+    return 'Success!'
+@app.route('/fail')
+def fail():
+    return 'Fail!'
 
 @app.route('/request_token')
 def request_token():
