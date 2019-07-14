@@ -145,8 +145,9 @@ def index():
 
     if request_token == oauth_token and oauth_verifier:
 
+        auth_access = OAuth1(ck, cs, request_token, ats)
+
         payload_access = {
-            'oauth_token':request_token,
             'oauth_verifier':oauth_verifier
         }
 
