@@ -14,7 +14,7 @@ import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import create_engine
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
@@ -134,19 +134,21 @@ sentiment_json = sentiment_df.to_json(orient='records')
 #Set up routes
 @app.route('/')
 def index():
+    query_string = request.query_string
+    print(query_string)
+
+    request_token = request.args.get("oauth_token")
+    print(request_token)
+    oauth_verifier = request.args.get("oauth_verifier")
+    print(oauth_verifier)
+    print(request_token == oauth_token)
     return render_template('index.html')
 
 @app.route('/request_token')
 def request_token():
-    print(oauth_token)
-    print("yes")
+    # print(oauth_token)
     token_response_dict = {"oauth_token": oauth_token}
-    print(jsonify(**token_response_dict))
-    # token_response_df = pd.DataFrame(token_response_dict)
-    # token_response_json = token_response_df.to_json(orient='records')
-    # token_response_dumps = json.dumps(token_response_dict)
     return(jsonify(**token_response_dict))
-    # return(jsonify(name = oauth_token))
 
 @app.route("/candidates_tweets")
 def candidates_tweets():
