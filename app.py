@@ -152,6 +152,7 @@ def index():
         }
 
         r_access = requests.post("https://api.twitter.com/oauth/access_token", auth = auth_access, data = payload_access)
+        r_access_text = r_access.text
 
         if r_access.status_code == 200:
             return redirect(url_for('test'))
@@ -162,7 +163,7 @@ def index():
 
 @app.route('/test')
 def test():
-    return 'Success!'
+    return 'Success! Text: {{ r_access_text }} '
 @app.route('/fail')
 def fail():
     return 'Fail!'
