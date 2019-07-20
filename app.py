@@ -17,7 +17,7 @@ from sqlalchemy import create_engine
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+# app.secret_key = os.urandom(24)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/candidates_tweets.sqlite"
 
@@ -76,11 +76,11 @@ payload = {
 
 r = requests.post('https://api.twitter.com/oauth/request_token', auth = auth, data = payload)
 
-print(r.url)
+print(f'Post Request Token URL:{r.url}')
 
-print(r.status_code)
+print(f'Post Request Token:{r.status_code}')
 
-print(r.text)
+print(f'Post Request Text: {r.text}')
 
 response_output = r.text
 response_parameters = response_output.split("&")
@@ -88,11 +88,11 @@ response_parameters = response_output.split("&")
 print(response_parameters)
 
 oauth_token = response_parameters[0][12:]
-print(oauth_token)
+print(f'OAuth_token:{oauth_token}')
 oauth_token_secret=response_parameters[1][19:]
-print(oauth_token_secret)
+print(f'Oauth Token Secret:{oauth_token_secret}')
 oauth_callback_confirmed = bool(response_parameters[2][25:])
-print(oauth_callback_confirmed)
+print(f'Callback Confirmed:{oauth_callback_confirmed}')
 
 #### Tweet DataSet
 tweets_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_tweets").fetchall())
@@ -146,10 +146,11 @@ sentiment_json = sentiment_df.to_json(orient='records')
 def index():
 
     query_string = request.query_string
-    print(query_string.decode())
-    print(type(query_string.decode()))
+    print(f'Query String: {query_string.decode()}')
+    # print(type(query_string.decode()))
     request_token = request.args.get("oauth_token")
-    print(request_token)
+    print(f'Query Request Token:{request_token}')
+    print(f'Query Request Token == Oauth Request? {request_token == oauth_token}')
     # print(type(request_token))
     # print(oauth_token)
     oauth_verifier = request.args.get("oauth_verifier")
@@ -158,7 +159,7 @@ def index():
 
         print("works!")
 
-        auth_access = OAuth1(ck, cs, request_token, ats)
+        auth_access = OAuth1(ck, cs, request_token, oauth_token_secret)
 
         payload_access = {
             'oauth_verifier':oauth_verifier
@@ -175,11 +176,12 @@ def index():
         print(post_access_params)
 
         access_token = post_access_params[0][12:]
+        # print(f'Access Token')
         access_token_secret = post_access_params[1][19:]
         user_id = post_access_params[2][8:]
         screen_name = post_access_params[3][12:]
 
-        session["username"] = screen_name
+        # session["username"] = screen_name
 
         # print(access_token)
         # print(access_token_secret)
