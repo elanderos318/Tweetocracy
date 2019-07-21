@@ -161,11 +161,13 @@ def index():
 
     #### Testing tweet request
 
-    tweet = requests.get("https://api.twitter.com/1.1/statuses/show.json?id=1152577020594917376", params = extended_payload, auth = auth)
+    # tweet = requests.get("https://api.twitter.com/1.1/statuses/show.json?id=1152577020594917376", params = extended_payload, auth = auth)
 
-    tweet_json = tweet.json()
+    # tweet_json = tweet.json()
 
-    print(json.dumps(tweet_json, indent=4))
+    # print(json.dumps(tweet_json, indent=4))
+
+
     # print(type(request_token))
     # print(oauth_token)
     oauth_verifier = request.args.get("oauth_verifier")
@@ -196,6 +198,29 @@ def index():
         print(f'Access Token SEcret: {access_token_secret}')
         screen_name = post_access_params[3][12:]
         print(f'Screen Name: {screen_name}')
+
+        #### Testing
+
+        final_access = OAuth1(ck, cs, access_token, access_token_secret)
+
+        # tweet = requests.get("https://api.twitter.com/1.1/statuses/show.json?id=1152577020594917376", params = extended_payload, auth = final_access)
+
+        # tweet_json = tweet.json()
+
+        # print(json.dumps(tweet_json, indent=4))
+
+        ## user timeline testing
+
+        timeline = requests.get("https://api.twitter.com/1.1/statuses/user_timeline.json?id=25073877&count=2", auth = final_access)
+
+
+        timeline_status = timeline.status_code
+        print(f'Timeline Status: {timeline_status}')
+
+        timeline_json = timeline.json()
+        print(json.dumps(timeline_json, indent = 4))
+
+
 
         # session["username"] = screen_name
 
