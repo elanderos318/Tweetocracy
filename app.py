@@ -141,6 +141,12 @@ sentiment_df = sentiment_df.rename(columns = {
 })
 sentiment_json = sentiment_df.to_json(orient='records')
 
+## Set up 'tweet_mode: extended' payload to show full texts of tweets
+
+extended_payload = {
+    'tweet_mode': 'extended'
+}
+
 #Set up routes
 @app.route('/')
 def index():
@@ -151,6 +157,15 @@ def index():
     request_token = request.args.get("oauth_token")
     print(f'Query Request Token:{request_token}')
     print(f'Query Request Token == Oauth Request? {request_token == oauth_token}')
+
+
+    #### Testing tweet request
+
+    tweet = requests.get("https://api.twitter.com/1.1/statuses/show.json?id=1152577020594917376", params = extended_payload, auth = auth)
+
+    tweet_json = tweet.json()
+
+    print(json.dumps(tweet_json, indent=4))
     # print(type(request_token))
     # print(oauth_token)
     oauth_verifier = request.args.get("oauth_verifier")
@@ -159,7 +174,7 @@ def index():
 
         print("works!")
 
-        auth_access = OAuth1(ck, cs, request_token, oauth_token_secret)
+        auth_access = OAuth1(ck, cs, oauth_token, oauth_token_secret)
 
         payload_access = {
             'oauth_verifier':oauth_verifier
@@ -168,18 +183,19 @@ def index():
         r_access = requests.post("https://api.twitter.com/oauth/access_token", auth = auth_access, data = payload_access)
         r_access_text = r_access.text
 
-        # print(r_access.status_code)
-        # print(r_access_text)
+        print(f'Post Access Status: {r_access.status_code}')
+        print(f'Post Access Text: {r_access_text}')
 
         post_access_params = r_access_text.split("&")
 
         print(post_access_params)
 
         access_token = post_access_params[0][12:]
-        # print(f'Access Token')
+        print(f'Access Token: {access_token}')
         access_token_secret = post_access_params[1][19:]
-        user_id = post_access_params[2][8:]
+        print(f'Access Token SEcret: {access_token_secret}')
         screen_name = post_access_params[3][12:]
+        print(f'Screen Name: {screen_name}')
 
         # session["username"] = screen_name
 
