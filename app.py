@@ -288,12 +288,6 @@ def test():
 
     ### Fetch Timeline Data
 
-    # current_candidate = "25073877"
-
-    # def retrieve_candidate_id():
-    #     for candidate in candidates_list():
-    #         yield candidate['twitter_user_id']
-
     response_list = []
 
     for x in range(len(candidates_list)):
@@ -312,6 +306,7 @@ def test():
 
         user_tweet_count = 0
         user_retweet_total = 0
+        user_favorite_total = 0
         passed_tweets = 0
 
 
@@ -347,19 +342,23 @@ def test():
                     continue
             
             retweet_count = tweet["retweet_count"]
+            favorite_count = tweet["favorite_count"]
             # print(retweet_count)
             # print(type(retweet_count))
 
             user_tweet_count = user_tweet_count + 1
             user_retweet_total = user_retweet_total + retweet_count
+            user_favorite_total = user_favorite_total + favorite_count
 
         retweet_average = user_retweet_total / user_tweet_count
+        favorite_average = user_favorite_total / user_tweet_count
 
         print(f'Retweet Average for User {user_name} is {retweet_average}')
 
         response_list.append({
             "user": user_name,
             "retweet_average": retweet_average,
+            "favorite_average": favorite_average,
             "total_tweets_retrieved": user_tweet_count,
             "total_retweets_counted": user_retweet_total
         })
