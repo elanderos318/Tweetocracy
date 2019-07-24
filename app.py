@@ -160,19 +160,40 @@ def index():
     print(f'Query Request Token:{request_token}')
     print(f'Query Request Token == Oauth Request? {request_token == oauth_token}')
 
+    oauth_verifier = request.args.get("oauth_verifier")
+
+
 
     ### Fetch Timeline Data
 
-    timeline = requests.get("https://api.twitter.com/1.1/statuses/user_timeline.json?id=25073877&count=2", params = extended_payload, auth = auth)
+    current_candidate
 
-    timeline_status = timeline.status_code
-    print(f'Timeline Status: {timeline_status}')
+    # timeline = requests.get("https://api.twitter.com/1.1/statuses/user_timeline.json?id=25073877&count=1", params = extended_payload, auth = auth)
 
-    timeline_json = timeline.json()
-    print(json.dumps(timeline_json, indent = 4))
+    # timeline_status = timeline.status_code
+    # print(f'Timeline Status: {timeline_status}')
 
-    for candidate in candidates_list:
-        print(candidate["name"])
+    # timeline_json = timeline.json()
+    # print(json.dumps(timeline_json, indent = 4))
+
+    # user_id = timeline_json[0]['user']['id_str']
+
+    # print(json.dumps(user_id))
+    # for candidate in candidates_list:
+    #     print(candidate["name"])
+    #     user_id = candidate["twitter_user_id"]
+
+    #     user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={user_id}&count=1', params = extended_payload, auth = auth)
+    #     user_json = user_get.json()
+
+        # user_id = user_json[0]['user']['id_str']
+        # print(f'User ID: {user_id}')
+        # response_screen_name = user_json[0]['user']['screen_name']
+        # if candidate['twitter_screen_name'] == response_screen_name:
+        #     print('Match')
+        # else:
+        #     print('Not a match')
+
 
     #### Testing tweet request
 
@@ -185,7 +206,6 @@ def index():
 
     # print(type(request_token))
     # print(oauth_token)
-    oauth_verifier = request.args.get("oauth_verifier")
 
     if request_token == oauth_token and oauth_verifier:
 
