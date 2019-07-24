@@ -16,6 +16,8 @@ from sqlalchemy import create_engine
 
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 
+from Candidates import candidates_list
+
 app = Flask(__name__)
 # app.secret_key = os.urandom(24)
 
@@ -158,6 +160,19 @@ def index():
     print(f'Query Request Token:{request_token}')
     print(f'Query Request Token == Oauth Request? {request_token == oauth_token}')
 
+
+    ### Fetch Timeline Data
+
+    timeline = requests.get("https://api.twitter.com/1.1/statuses/user_timeline.json?id=25073877&count=2", params = extended_payload, auth = auth)
+
+    timeline_status = timeline.status_code
+    print(f'Timeline Status: {timeline_status}')
+
+    timeline_json = timeline.json()
+    print(json.dumps(timeline_json, indent = 4))
+
+    for candidate in candidates_list:
+        print(candidate["name"])
 
     #### Testing tweet request
 
