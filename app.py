@@ -288,62 +288,130 @@ def test():
 
     ### Fetch Timeline Data
 
-    current_candidate = "25073877"
+    # current_candidate = "25073877"
 
-    user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={current_candidate}&count=100', params = extended_payload, auth = auth)
-    print(user_get.status_code)
-    user_json = user_get.json()
-    print(len(user_json))
+    # def retrieve_candidate_id():
+    #     for candidate in candidates_list():
+    #         yield candidate['twitter_user_id']
 
-    print(user_get.text)
+    response_list = []
+
+    for x in range(len(candidates_list)):
+
+        user_name = candidates_list[x]['name']
+        user_id = candidates_list[x]["twitter_user_id"]
+
+        # if user_name == "Donald Trump":
+        #     continue
+
+        print(f'Retrieving Data for {user_name}')
+
+        user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={user_id}&count=100', params = extended_payload, auth = auth)
+
+        user_json = user_get.json()
+
+        user_tweet_count = 0
+        user_retweet_total = 0
+        passed_tweets = 0
+
+
+        for tweet in user_json:
+
+
+            print(f'Tweet Count: {user_tweet_count}')
+            print(f'Total Retweet Count: {user_retweet_total}')
+
+            try:
+                tweet["retweeted_status"]
+                # print("is a retweet")
+                passed_tweets = passed_tweets + 1
+                continue
+            except KeyError:
+                pass
+                # print("not a retweet")
+
+
+            reply = tweet['in_reply_to_user_id_str']
+
+            if reply:
+                # print(reply)
+                # print(tweet['id_str'])
+                # print(reply == tweet['id_str'])
+                # print(tweet['full_text'])
+                if reply == tweet['user']['id_str']:
+                    # print("is a self reply")
+                    pass
+                else:
+                    # print("not a self reply")
+                    passed_tweets = passed_tweets + 1
+                    continue
+            
+            retweet_count = tweet["retweet_count"]
+            # print(retweet_count)
+            # print(type(retweet_count))
+
+            user_tweet_count = user_tweet_count + 1
+            user_retweet_total = user_retweet_total + retweet_count
+
+        retweet_average = user_retweet_total / user_tweet_count
+
+        print(f'Retweet Average for User {user_name} is {retweet_average}')
+
+        response_list.append({
+            "user": user_name,
+            "retweet_average": retweet_average,
+            "total_tweets_retrieved": user_tweet_count,
+            "total_retweets_counted": user_retweet_total
+        })
+
+
+    print(response_list)
+
+    response_json = json.dumps(response_list)
+    # user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={current_candidate}&count=100', params = extended_payload, auth = auth)
+    # print(user_get.status_code)
+    # user_json = user_get.json()
+    # print(len(user_json))
 
     # print(json.dumps(user_json, indent=4))
 
-    user_tweet_count = 0
-    user_retweet_total = 0
+    # user_tweet_count = 0
+    # user_retweet_total = 0
 
-    passed_tweets = 0
+    # passed_tweets = 0
 
-    for tweet in user_json:
+    # for tweet in user_json:
 
-        try:
-            tweet["retweeted_status"]
-            # print("is a retweet")
-            passed_tweets = passed_tweets + 1
-            continue
-        except KeyError:
-            pass
-            # print("not a retweet")
+    #     try:
+    #         tweet["retweeted_status"]
+    #         passed_tweets = passed_tweets + 1
+    #         continue
+    #     except KeyError:
+    #         pass
 
 
-        reply = tweet['in_reply_to_user_id_str']
+    #     reply = tweet['in_reply_to_user_id_str']
 
-        if reply:
-            # print(reply)
-            # print(tweet['id_str'])
-            # print(reply == tweet['id_str'])
-            # print(tweet['full_text'])
-            if reply == tweet['user']['id_str']:
-                print("is a self reply")
-            else:
-                print("not a self reply")
-                passed_tweets = passed_tweets + 1
-                continue
+    #     if reply:
+    #         if reply == tweet['user']['id_str']:
+    #             pass
+    #         else:
+    #             passed_tweets = passed_tweets + 1
+    #             continue
         
-        retweet_count = tweet["retweet_count"]
-        print(retweet_count)
-        print(type(retweet_count))
+    #     retweet_count = tweet["retweet_count"]
+    #     print(retweet_count)
 
-        user_tweet_count = user_tweet_count + 1
-        user_retweet_total = user_retweet_total + retweet_count
+    #     user_tweet_count = user_tweet_count + 1
+    #     user_retweet_total = user_retweet_total + retweet_count
     
-    print(passed_tweets)
-    print(user_tweet_count)
-    print(user_retweet_total)
-    retweet_average = user_retweet_total / user_tweet_count
-    print(retweet_average)
+    # print(passed_tweets)
+    # print(user_tweet_count)
+    # print(user_retweet_total)
+    # retweet_average = user_retweet_total / user_tweet_count
+    # print(retweet_average)
 
-    return(jsonify(retweet_average))
+    return(jsonify(response_json))
 
 
 @app.route('/fail')

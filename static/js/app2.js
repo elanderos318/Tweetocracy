@@ -1,27 +1,26 @@
 // Select Twitter Button
 var twitterButton = d3.select(".twitter-button");
 // Create Event Listener
-// twitterButton.on("click", getOauthAuthorize);
+twitterButton.on("click", getOauthAuthorize);
 // Fetch Request Token Data, then redirect to Twitter's Authorization page
-// function getOauthAuthorize() {
-//     console.log("yes")
-//     d3.json("/request_token").then(function(data) {
-//         var request_token = data["oauth_token"];
-//         window.location.replace(`https://api.twitter.com/oauth/authorize?oauth_token=${request_token}`)
-//     }).catch(e => {
-//         console.log(e);
-//     })
-// }
+function getOauthAuthorize() {
+    console.log("yes")
+    d3.json("/request_token", function(err, data) {
+        if (err) throw err;
+        var request_token = data["oauth_token"];
+        window.location.replace(`https://api.twitter.com/oauth/authorize?oauth_token=${request_token}`)
+    })
+}
 
 // Set SVG Chart Formatting
-var svgHeight = 600;
+var svgHeight = 700;
 var svgWidth = 1100;
 
 
 var margin = {
   top: 60,
   right: 40,
-  bottom: 80,
+  bottom: 140,
   left: 100
 };
 
@@ -40,6 +39,8 @@ var svg = d3
 var chartGroup = svg.append("g")
 .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+// Create color variable
+var colorBands = d3.scaleOrdinal(d3.schemeCategory20);
 
 // Fetch Timeline Average Retweet Data and generate graph
 
@@ -48,24 +49,26 @@ d3.json("/test", function(err, data) {
 
     var retweetData = JSON.parse(data);
 
-    var retweetObject = [{
-        'retweets': retweetData
-    }];
-
-    retweetObject.retweets = retweetData;
-
-    console.log(retweetObject);
-
     console.log(retweetData);
 
-    var bands = ["Donald Trump"];
+    // var retweetObject = [{
+    //     'retweets': retweetData
+    // }];
+
+    // retweetObject.retweets = retweetData;
+
+    // console.log(retweetObject);
+
+
+    var bands = retweetData.map(d => d['user']);
+    var retweetAverages = retweetData.map(d => d['retweet_average']);
 
     // var yScaleBands = d3.scaleLinear()
     //     .domain([0, d3.max(retweetData)])
     //     .range([height, 0])
 
     var yScaleBands = d3.scaleLinear()
-        .domain([0, retweetData])
+        .domain([0, d3.max(retweetAverages)])
         .range([height, 0])
 
     var xScaleBands = d3.scaleBand()
@@ -85,22 +88,59 @@ d3.json("/test", function(err, data) {
     chartGroup.append("g")
         .attr("transform", `translate(0, ${height})`)
         .classed("x-band-axis", true)
-        .call(xBandsAxis);
+        .call(xBandsAxis)
+        .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(90)")
+            .style("text-anchor", "start");
 
     var rectGroup = chartGroup.selectAll("rect")
-        .data(retweetObject)
+        .data(retweetData)
         .enter()
         .append("rect")
         .attr("x", (d, i) => xScaleBands(bands[i]))
-        .attr("y", d => yScaleBands(d['retweets']))
+        .attr("y", d => yScaleBands(d['retweet_average']))
         .attr("width", xScaleBands.bandwidth())
-        .attr("height", d => height - yScaleBands(d['retweets']))
+        .attr("height", d => height - yScaleBands(d['retweet_average']))
         .classed("bandsData", true)
         .style("stroke", "black")
-        .style("fill", "black")
+        .style("fill", (d, i) => colorBands(i))
 
-    console.log(rectGroup)
+    // Append title
+    chartGroup.append("text")
+        .attr("transform", `translate(${width / 2}, -15)`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "30px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1.5px")
+        .attr("font-family", "Lato")
+        .text("Mean # of Retweets per Candidate");
 
+    // Append x axis label
+    chartGroup.append("text")
+        .attr("transform", `translate(${width / 2}, ${height + 130})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px")
+        .attr("font-family", "Roboto")
+        .text("Candidate");
+
+    // Append y axis label
+    chartGroup.append("text")
+        .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
+        .attr("y", "-50")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .attr("fill", d3.rgb(150,150,150))
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px")
+        .attr("font-family", "Roboto")
+        .text("Average Number of Retweets")
     // var rectGroup = chartGroup.selectAll("rect")
     //     .data(retweetObject)
     //     .enter()
