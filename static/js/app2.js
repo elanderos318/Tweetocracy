@@ -12,6 +12,15 @@ function getOauthAuthorize() {
     })
 }
 
+// testing checkboxes
+bidenBox = d3.select("#joe-biden-checkbox");
+
+bidenBox.on("click", function() {
+    if (bidenBox.property("checked")) {
+        console.log("biden is checked");
+    }
+})
+
 // Set SVG Chart Formatting
 var svgHeight = 700;
 var svgWidth = 1100;
@@ -116,7 +125,7 @@ function retweetGraphAAG(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1.5px")
         .attr("font-family", "Lato")
-        .text("Mean # of Retweets per Candidate");
+        .text("Average Num. of Retweets per Candidate");
 
     // Append x axis label
     chartGroupRetweetsAAG.append("text")
@@ -214,7 +223,7 @@ function favoriteGraphAAG(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1.5px")
         .attr("font-family", "Lato")
-        .text("Mean # of Favorites per Candidate");
+        .text("Average Num. of Favorites per Candidate");
 
     // Append x axis label
     chartGroupFavoritesAAG.append("text")

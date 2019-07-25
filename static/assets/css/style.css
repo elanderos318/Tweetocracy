@@ -46,3 +46,21 @@ font-weight: 600;
 .sub-header {
 font-weight: 400;
 }
+
+/* Graph Panel CSS */
+
+.action-panel {
+    background-color: rgba(0, 38, 255, 0.705);
+}
+
+.action-sub-panel {
+    background-color: #99c9f5 !important;
+}
+
+.input-text {
+    color: black;
+    /* font-weight: bold; */
+    stroke: black;
+}
+
+/* Graph CSS */
