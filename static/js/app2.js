@@ -18,8 +18,14 @@ bidenBox = d3.select("#joe-biden-checkbox");
 bidenBox.on("click", function() {
     if (bidenBox.property("checked")) {
         console.log("biden is checked");
+
+        dateValue = datePicker.property("value");
+        console.log(dateValue)
     }
 })
+
+datePicker = d3.select(".datepicker");
+
 
 // Set SVG Chart Formatting
 var svgHeight = 700;

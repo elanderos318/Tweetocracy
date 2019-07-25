@@ -81,7 +81,7 @@
 
   <div class = "divider"></div>
 
-    <div class = "row section">
+    <div class = "row section valign-wrapper">
       <div class = "col m3">
 
         <div class = "card action-panel">
@@ -307,21 +307,36 @@
 
             </form>
 
+
+          </div> <!--card-action action-sub-panel-->
+
+          <div class = "card-content white-text">
+            <span class = "card-title">Select Date Range:</span>
           </div>
 
-        </div>
-<!-- 
-        <form>
-            <p>
-              <label for = "joe-biden-checkbox">
-                <input id = "joe-biden-checkbox" type= 'checkbox'>
-                <span>Joe Biden</span>
-              </label>
-            </p>
-        </form> -->
+          <div class = "card-action action-sub-panel">
+              <span>Date From:</span>
+              <input type="text" id = "retweet-date-from" class="datepicker">
+              <span>Date To:</span>
+              <input type="text" id = "retweet-date-to" class="datepicker">
+          </div>
 
+          <div class = "card-content">
+              <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+                  <i class="material-icons right">send</i>
+              </button>
+          </div>
+
+
+        </div> <!--card action-panel-->
+
+      </div> <!--col m3-->
+
+      <!--div column for graph-->
+      <div class = "col m9">
+        <div class = "at-a-glance-retweets"></div>
       </div>
-      <div class = "at-a-glance-retweets col m9"></div>
+
     </div>
 
 
