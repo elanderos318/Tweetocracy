@@ -27,6 +27,7 @@ bidenBox.on("click", function() {
 datePicker = d3.select(".datepicker");
 
 
+
 // Set SVG Chart Formatting
 var svgHeight = 700;
 var svgWidth = 1100;
@@ -52,6 +53,152 @@ d3.json("/test", function(err, data) {
     favoriteGraphAAG(data);
 
 });
+
+
+// Select "Retweet At a Glance" Checkboxes
+var bidenBox = d3.select("#joe-biden-checkbox");
+var bookerBox = d3.select("#cory-booker-checkbox");
+var buttigiegBox = d3.select("#pete-Buttigieg-checkbox");
+var castroBox = d3.select("#julian-castro-checkbox");
+var delaneyBox = d3.select("#john-delaney-checkbox");
+var gabbardBox = d3.select("#tulsi-gabbard-box");
+var gillibrandBox = d3.select("#kirsten-gillibrand-checkbox");
+var gravelBox = d3.select("#mike-gravel-checkbox");
+var harrisBox = d3.select("#kamala-harris-checkbox");
+var hickenlooperBox = d3.select("#john-hickenlooper-checkbox");
+var insleeBox = d3.select("#jay-inslee-checkbox");
+var klobucharBox = d3.select("#amy-klobuchar-checkbox");
+var messamBox = d3.select("#wayne-messam-checkbox");
+var moultonBox = d3.select("#seth-moulton-checkbox");
+var rourkeBox = d3.select("#beto-rourke-checkbox");
+var ryanBox = d3.select("#tim-ryan-checkbox");
+var sandersBox = d3.select("#bernie-sanders-checkbox");
+var trumpBox = d3.select("#donald-trump-checkbox");
+var warrenBox = d3.select("#elizabeth-warren-checkbox");
+var weldBox = d3.select("#bill-weld-checkbox");
+var williamsonBox = d3.select("#marianne-williamson-checkbox");
+var yangBox = d3.select("#andrew-yang-checkbox");
+var swalwellBox = d3.select("#eric-swalwell-checkbox");
+var bennetBox = d3.select("#michael-bennet-checkbox");
+var bullockBox = d3.select("#steve-bullock-checkbox");
+var blasioBox = d3.select("#bill-blasio-checkbox");
+var sestakBox = d3.select("#joe-sestak-checkbox");
+var steyerBox = d3.select("#tom-steyer-checkbox");
+
+// Select "retweet at a glance" Submit Button
+var retweetSubmit = d3.select(".retweet-submit");
+
+// Create event listener for retweet submit button
+retweetSubmit.on("click", retweetSubmitClick);
+
+// Create Button Click function
+function retweetSubmitClick() {
+    // Create list to append all checked candidates
+    var candidateList = [];
+    // Prevent the page from refreshing
+    d3.event.preventDefault();
+
+    ////////////////////////////////////////////////////
+    // Append list with names whose boxes are checked
+    if (bidenBox.property("checked")) {
+        candidateList.push("Joe Biden");
+    }
+    if (bookerBox.property("checked")) {
+        candidateList.push("Cory Booker");
+    }
+    if (buttigiegBox.property("checked")) {
+        candidateList.push("Pete Buttigieg");
+    }
+    if (castroBox.property("checked")) {
+        candidateList.push("Julián Castro");
+    }
+    if (delaneyBox.property("checked")) {
+        candidateList.push("John Delaney");
+    }
+    if (gabbardBox.property("checked")) {
+        candidateList.push("Tulsi Gabbard");
+    }
+    if (gillibrandBox.property("checked")) {
+        candidateList.push("Kirsten Gillibrand");
+    }
+    if (gravelBox.property("checked")) {
+        candidateList.push("Mike Gravel");
+    }
+    if (harrisBox.property("checked")) {
+        candidateList.push("Kamala Harris");
+    }
+    if (hickenlooperBox.property("checked")) {
+        candidateList.push("John Hickenlooper");
+    }
+    if (insleeBox.property("checked")) {
+        candidateList.push("Jay Inslee");
+    }
+    if (klobucharBox.property("checked")) {
+        candidateList.push("Amy Klobuchar");
+    }
+    if (messamBox.property("checked")) {
+        candidateList.push("Wayne Messam");
+    }
+    if (moultonBox.property("checked")) {
+        candidateList.push("Seth Moulton");
+    }
+    if (rourkeBox.property("checked")) {
+        candidateList.push("Beto O'Rourke");
+    }
+    if (ryanBox.property("checked")) {
+        candidateList.push("Tim Ryan");
+    }
+    if (sandersBox.property("checked")) {
+        candidateList.push("Bernie Sanders");
+    }
+    if (trumpBox.property("checked")) {
+        candidateList.push("Donald Trump");
+    }
+    if (warrenBox.property("checked")) {
+        candidateList.push("Elizabeth Warren");
+    }
+    if (weldBox.property("checked")) {
+        candidateList.push("Bill Weld");
+    }
+    if (williamsonBox.property("checked")) {
+        candidateList.push("Marianne Williamson");
+    }
+    if (yangBox.property("checked")) {
+        candidateList.push("Andrew Yang");
+    }
+    if (swalwellBox.property("checked")) {
+        candidateList.push("Eric Swalwell");
+    }
+    if (bennetBox.property("checked")) {
+        candidateList.push("Michael Bennet");
+    }
+    if (bullockBox.property("checked")) {
+        candidateList.push("Steve Bullock");
+    }
+    if (blasioBox.property("checked")) {
+        candidateList.push("Bill De Blasio");
+    }
+    if (sestakBox.property("checked")) {
+        candidateList.push("Joe Sestak");
+    }
+    if (steyerBox.property("checked")) {
+        candidateList.push("Tom Steyer");
+    }
+    /////////////////////////////////////////////
+
+    // Check Date Range Selected
+
+
+
+    ////////////////////////////////////////////
+
+    filteredCandidatesData(candidateList);
+}
+
+
+// function filteredCandidatesData(candidates) {
+//     d3.json
+// }
 
 
 // Create an SVG wrapper, append an SVG group that will hold our chart,
