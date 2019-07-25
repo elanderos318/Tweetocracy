@@ -303,6 +303,7 @@ def test():
         user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={user_id}&count=100', params = extended_payload, auth = auth)
 
         user_json = user_get.json()
+        print(json.dumps(user_json[0], indent = 4))
 
         user_tweet_count = 0
         user_retweet_total = 0
