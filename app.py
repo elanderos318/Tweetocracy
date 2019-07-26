@@ -109,51 +109,51 @@ oauth_callback_confirmed = bool(response_parameters[2][25:])
 print(f'Callback Confirmed:{oauth_callback_confirmed}')
 
 #### Tweet DataSet
-tweets_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_tweets").fetchall())
-tweets_df = tweets_df.rename(columns = {
-    0: "comments",
-    1: "date_string",
-    2: "datetime",
-    3: "engagement_score",
-    4: "favorites",
-    5: "name",
-    6: "party",
-    7: "retweets",
-    8: "stream_id",
-    9: "text",
-    10: "tweet_url",
-    11: "twitter_username",
-    12: "unix_time"
-})
-tweets_json = tweets_df.to_json(orient='records')
+# tweets_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_tweets").fetchall())
+# tweets_df = tweets_df.rename(columns = {
+#     0: "comments",
+#     1: "date_string",
+#     2: "datetime",
+#     3: "engagement_score",
+#     4: "favorites",
+#     5: "name",
+#     6: "party",
+#     7: "retweets",
+#     8: "stream_id",
+#     9: "text",
+#     10: "tweet_url",
+#     11: "twitter_username",
+#     12: "unix_time"
+# })
+# tweets_json = tweets_df.to_json(orient='records')
 
 ### Hour Dataset
-hour_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_hour_categorized").fetchall())
-hour_df = hour_df.rename(columns = {
-    0: "name",
-    1: "tweet_hour",
-    2: "median_engagement"
-})
-hour_json = hour_df.to_json(orient='records')
+# hour_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_hour_categorized").fetchall())
+# hour_df = hour_df.rename(columns = {
+#     0: "name",
+#     1: "tweet_hour",
+#     2: "median_engagement"
+# })
+# hour_json = hour_df.to_json(orient='records')
 
 ### Day Dataset
-day_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_day_categorized").fetchall())
-day_df = day_df.rename(columns = {
-    0: "name",
-    1: "tweet_weekday",
-    2: "median_engagement"
-})
-day_json = day_df.to_json(orient='records')
+# day_df = pd.DataFrame(engine.execute("SELECT * FROM candidates_day_categorized").fetchall())
+# day_df = day_df.rename(columns = {
+#     0: "name",
+#     1: "tweet_weekday",
+#     2: "median_engagement"
+# })
+# day_json = day_df.to_json(orient='records')
 
 ### Replies Sentiment Dataset
-sentiment_df = pd.DataFrame(engine.execute("SELECT * FROM replies_absolute_sentiment").fetchall())
-sentiment_df = sentiment_df.rename(columns = {
-    0: "name",
-    1: "stream_id",
-    2: "engagement_score",
-    3: "average_absolute_sentiment_score"
-})
-sentiment_json = sentiment_df.to_json(orient='records')
+# sentiment_df = pd.DataFrame(engine.execute("SELECT * FROM replies_absolute_sentiment").fetchall())
+# sentiment_df = sentiment_df.rename(columns = {
+#     0: "name",
+#     1: "stream_id",
+#     2: "engagement_score",
+#     3: "average_absolute_sentiment_score"
+# })
+# sentiment_json = sentiment_df.to_json(orient='records')
 
 ## Set up 'tweet_mode: extended' payload to show full texts of tweets
 
@@ -297,6 +297,9 @@ def test():
 
     response_list = []
 
+    # Create Session for updating sql table
+    session = Session(engine)
+
     for x in range(len(candidates_list)):
 
         candidate_name = candidates_list[x]['name']
@@ -316,10 +319,10 @@ def test():
         user_retweet_total = 0
         user_favorite_total = 0
         passed_tweets = 0
-
+        
 
         for tweet in user_json:
-
+            
 
             print(f'Tweet Count: {user_tweet_count}')
             print(f'Total Retweet Count: {user_retweet_total}')
@@ -360,6 +363,31 @@ def test():
             retweet_count = tweet["retweet_count"]
             favorite_count = tweet["favorite_count"]
 
+            # Query the sql table and look for tweet_id_str
+
+            tweet_query = session.query(Tweets)
+
+            if tweet_query.filter_by(tweet_id_str = tweet_id_str).count() > 0:
+                print("existing tweet")
+                # current_tweet = tweet_query.filter(Tweets.tweet_id_str == tweet_id_str).count()
+                # print(current_tweet)
+            else:
+                print("adding tweet to db")
+                session.add(Tweets(created_at = created_at, tweet_id = tweet_id, tweet_id_str = tweet_id_str,
+                    full_text = full_text, in_reply_to_status_id = in_reply_to_status_id,
+                    in_reply_to_status_id_str = in_reply_to_status_id_str,
+                    in_reply_to_user_id = in_reply_to_user_id, in_reply_to_user_id_str = in_reply_to_user_id_str,
+                    user_id = user_id, user_id_str = user_id_str, user_name = user_name, user_screen_name = user_screen_name,
+                    retweet_count = retweet_count, favorite_count = favorite_count))
+
+                session.commit()
+            
+            # new_tweet_query = session.query(Tweets)
+            # for tweet in new_tweet_query:
+            #     print(tweet.tweet_id_str)
+
+            ################################################
+
             user_tweet_count = user_tweet_count + 1
             user_retweet_total = user_retweet_total + retweet_count
             user_favorite_total = user_favorite_total + favorite_count
@@ -381,48 +409,6 @@ def test():
     print(response_list)
 
     response_json = json.dumps(response_list)
-    # user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={current_candidate}&count=100', params = extended_payload, auth = auth)
-    # print(user_get.status_code)
-    # user_json = user_get.json()
-    # print(len(user_json))
-
-    # print(json.dumps(user_json, indent=4))
-
-    # user_tweet_count = 0
-    # user_retweet_total = 0
-
-    # passed_tweets = 0
-
-    # for tweet in user_json:
-
-    #     try:
-    #         tweet["retweeted_status"]
-    #         passed_tweets = passed_tweets + 1
-    #         continue
-    #     except KeyError:
-    #         pass
-
-
-    #     reply = tweet['in_reply_to_user_id_str']
-
-    #     if reply:
-    #         if reply == tweet['user']['id_str']:
-    #             pass
-    #         else:
-    #             passed_tweets = passed_tweets + 1
-    #             continue
-        
-    #     retweet_count = tweet["retweet_count"]
-    #     print(retweet_count)
-
-    #     user_tweet_count = user_tweet_count + 1
-    #     user_retweet_total = user_retweet_total + retweet_count
-    
-    # print(passed_tweets)
-    # print(user_tweet_count)
-    # print(user_retweet_total)
-    # retweet_average = user_retweet_total / user_tweet_count
-    # print(retweet_average)
 
     return(jsonify(response_json))
 
