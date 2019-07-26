@@ -278,7 +278,7 @@ function retweetGraphAAG(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1.5px")
         .attr("font-family", "Lato")
-        .text("Average Num. of Retweets per Candidate");
+        .text("Average Number of Retweets per Candidate");
 
     // Append x axis label
     chartGroupRetweetsAAG.append("text")
@@ -376,7 +376,7 @@ function favoriteGraphAAG(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1.5px")
         .attr("font-family", "Lato")
-        .text("Average Num. of Favorites per Candidate");
+        .text("Average Number of Favorites per Candidate");
 
     // Append x axis label
     chartGroupFavoritesAAG.append("text")

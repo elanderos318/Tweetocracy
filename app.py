@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session
@@ -21,9 +22,20 @@ from Candidates import candidates_list
 app = Flask(__name__)
 # app.secret_key = os.urandom(24)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/candidates_tweets.sqlite"
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/candidates_tweets.sqlite"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/twitter_db.sqlite"
 
-engine = create_engine('sqlite:///db/candidates_tweets.sqlite', echo = False)
+
+# engine = create_engine('sqlite:///db/candidates_tweets.sqlite', echo = False)
+engine = create_engine('sqlite:///db/twitter_db.sqlite', echo = False)
+
+# Declare a Base using automap_base()
+Base = automap_base()
+# Use the Base class to reflect the database tables
+Base.prepare(engine, reflect=True)
+# Assign the tweets class to a variable called 'Tweets'
+Tweets = Base.classes.tweet_data
+
 
 ######
 
@@ -59,12 +71,11 @@ cs = cse_d.decode()
 at = ate_d.decode()
 ats = atse_d.decode()
 
+# Create authorization object
 auth = OAuth1(ck, cs, at, ats)
 
+# Required callback_url for twitter authorization
 callback_url = "https://tweetocracy.herokuapp.com/"
-
-# declare variable
-# oauth_token = "_"
 
 # payload = {
 #     'oauth_callback':callback_url
@@ -72,23 +83,24 @@ callback_url = "https://tweetocracy.herokuapp.com/"
 
 # local testing
 
+# Payload object sends required callback info to twitter API
 payload = {
     'oauth_callback':"http://127.0.0.1:5000/"
 }
 
+# Execute a POST/Auth request to twittier api to intitiate access
 r = requests.post('https://api.twitter.com/oauth/request_token', auth = auth, data = payload)
 
 print(f'Post Request Token URL:{r.url}')
-
 print(f'Post Request Status:{r.status_code}')
-
 print(f'Post Request Text: {r.text}')
 
+# Collect response information
 response_output = r.text
+# Relevant paramters are received as a string, separated by an '&' character
 response_parameters = response_output.split("&")
 
-print(response_parameters)
-
+# Store relevant response paramters in variables
 oauth_token = response_parameters[0][12:]
 print(f'OAuth_token:{oauth_token}')
 oauth_token_secret=response_parameters[1][19:]
@@ -161,11 +173,6 @@ def index():
     print(f'Query Request Token == Oauth Request? {request_token == oauth_token}')
 
     oauth_verifier = request.args.get("oauth_verifier")
-
-
-
-
-
 
         # print(reply)
         # print(type(reply))
@@ -292,15 +299,15 @@ def test():
 
     for x in range(len(candidates_list)):
 
-        user_name = candidates_list[x]['name']
-        user_id = candidates_list[x]["twitter_user_id"]
+        candidate_name = candidates_list[x]['name']
+        candidate_id = candidates_list[x]["twitter_user_id"]
 
         # if user_name == "Donald Trump":
         #     continue
 
-        print(f'Retrieving Data for {user_name}')
+        print(f'Retrieving Data for {candidate_name}')
 
-        user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={user_id}&count=100', params = extended_payload, auth = auth)
+        user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&count=100', params = extended_payload, auth = auth)
 
         user_json = user_get.json()
         print(json.dumps(user_json[0], indent = 4))
@@ -317,35 +324,41 @@ def test():
             print(f'Tweet Count: {user_tweet_count}')
             print(f'Total Retweet Count: {user_retweet_total}')
 
+            # We do not count retweets as user tweets. If retweeted_stats is true, we will continue to the next iteration
             try:
                 tweet["retweeted_status"]
-                # print("is a retweet")
                 passed_tweets = passed_tweets + 1
                 continue
             except KeyError:
                 pass
-                # print("not a retweet")
 
+            ####### Program code for detecting replies/self-replies
 
-            reply = tweet['in_reply_to_user_id_str']
+            # reply = tweet['in_reply_to_user_id_str']
 
-            if reply:
-                # print(reply)
-                # print(tweet['id_str'])
-                # print(reply == tweet['id_str'])
-                # print(tweet['full_text'])
-                if reply == tweet['user']['id_str']:
-                    # print("is a self reply")
-                    pass
-                else:
-                    # print("not a self reply")
-                    passed_tweets = passed_tweets + 1
-                    continue
+            # if reply:
+            #     if reply == tweet['user']['id_str']:
+            #         pass
+            #     else:
+            #         passed_tweets = passed_tweets + 1
+            #         continue
             
+
+            # Store relevant information in variables
+            created_at = tweet["created_at"]
+            tweet_id = tweet["id"]
+            tweet_id_str = tweet["id_str"]
+            full_text = tweet["full_text"]
+            in_reply_to_status_id = tweet["in_reply_to_status_id"]
+            in_reply_to_status_id_str = tweet["in_reply_to_status_id_str"]
+            in_reply_to_user_id = tweet["in_reply_to_user_id"]
+            in_reply_to_user_id_str = tweet["in_reply_to_user_id_str"]
+            user_id = tweet["user"]["id"]
+            user_id_str = tweet["user"]["id_str"]
+            user_name = tweet["user"]["name"]
+            user_screen_name = tweet["user"]["screen_name"]
             retweet_count = tweet["retweet_count"]
             favorite_count = tweet["favorite_count"]
-            # print(retweet_count)
-            # print(type(retweet_count))
 
             user_tweet_count = user_tweet_count + 1
             user_retweet_total = user_retweet_total + retweet_count
