@@ -13,7 +13,7 @@ import numpy as np
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 
@@ -174,57 +174,6 @@ def index():
 
     oauth_verifier = request.args.get("oauth_verifier")
 
-        # print(reply)
-        # print(type(reply))
-
-        # if reply:
-        #     print("yes")
-        # else:
-        #     print("no")
-    
-    # reply_tweet = requests.get("https://api.twitter.com/1.1/statuses/show.json?id=1153737355188199437", params = extended_payload, auth = auth)
-    # reply_json = reply_tweet.json()
-    # print(json.dumps(reply_json, indent=4))
-
-
-    # timeline = requests.get("https://api.twitter.com/1.1/statuses/user_timeline.json?id=25073877&count=1", params = extended_payload, auth = auth)
-
-    # timeline_status = timeline.status_code
-    # print(f'Timeline Status: {timeline_status}')
-
-    # timeline_json = timeline.json()
-    # print(json.dumps(timeline_json, indent = 4))
-
-    # user_id = timeline_json[0]['user']['id_str']
-
-    # print(json.dumps(user_id))
-    # for candidate in candidates_list:
-    #     print(candidate["name"])
-    #     user_id = candidate["twitter_user_id"]
-
-    #     user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={user_id}&count=1', params = extended_payload, auth = auth)
-    #     user_json = user_get.json()
-
-        # user_id = user_json[0]['user']['id_str']
-        # print(f'User ID: {user_id}')
-        # response_screen_name = user_json[0]['user']['screen_name']
-        # if candidate['twitter_screen_name'] == response_screen_name:
-        #     print('Match')
-        # else:
-        #     print('Not a match')
-
-
-    #### Testing tweet request
-
-    # tweet = requests.get("https://api.twitter.com/1.1/statuses/show.json?id=1152577020594917376", params = extended_payload, auth = auth)
-
-    # tweet_json = tweet.json()
-
-    # print(json.dumps(tweet_json, indent=4))
-
-
-    # print(type(request_token))
-    # print(oauth_token)
 
     if request_token == oauth_token and oauth_verifier:
 
@@ -405,12 +354,78 @@ def test():
             "total_retweets_counted": user_retweet_total
         })
 
+    graph_data = session.query(Tweets).all()
 
-    print(response_list)
+    graph_data_list = []
 
-    response_json = json.dumps(response_list)
+    for row in graph_data:
+        data_dict = {}
+        data_dict["created_at"] = row.created_at
+        data_dict["tweet_id"] = row.tweet_id
+        data_dict["tweet_id_str"] = row.tweet_id_str
+        data_dict["full_text"] = row.full_text
+        data_dict["in_reply_to_status_id"] = row.in_reply_to_status_id
+        data_dict["in_reply_to_status_id_str"] = row.in_reply_to_status_id_str
+        data_dict["in_reply_to_user_id"] = row.in_reply_to_user_id
+        data_dict["in_reply_to_user_id_str"] = row.in_reply_to_user_id_str
+        data_dict["user_id"] = row.user_id
+        data_dict["user_id_str"] = row.user_id_str
+        data_dict["user_name"] = row.user_name
+        data_dict["user_screen_name"] = row.user_screen_name
+        data_dict["retweet_count"] = row.retweet_count
+        data_dict["favorite_count"] = row.favorite_count
+        graph_data_list.append(data_dict)
+
+    response_json = json.dumps(graph_data_list)
 
     return(jsonify(response_json))
+
+# @app.route("/foo")
+# def foo():
+
+#     session = Session(engine)
+
+#     candidate_query = session.query(Tweets.)
+
+#     for candidate in candidates_list:
+
+#         candidate_id = candidate["twitter_user_id"]
+
+#         candidate_query = session.query(Tweets).filter_by(user_id_str = candidate_id)
+
+        
+
+
+#     graph_data = session.query(Tweets).all()
+
+#     graph_data_list = []
+
+#     for row in graph_data:
+#         data_dict = {}
+#         data_dict["created_at"] = row["created_at"]
+#         data_dict["tweet_id"] = row["tweet_id"]
+#         data_dict["tweet_id_str"] = row["tweet_id_str"]
+#         data_dict["full_text"] = row["full_text"]
+#         data_dict["in_reply_to_status_id"] = row["in_reply_to_status_id"]
+#         data_dict["in_reply_to_status_id_str"] = row["in_reply_to_status_id_str"]
+#         data_dict["in_reply_to_user_id"] = row["in_reply_to_user_id"]
+#         data_dict["in_reply_to_user_id_str"] = row["in_reply_to_user_id_str"]
+#         data_dict["user_id"] = row["user_id"]
+#         data_dict["user_id_str"] = row["user_id_str"]
+#         data_dict["user_name"] = row["user_name"]
+#         data_dict["user_screen_name"] = row["user_screen_name"]
+#         data_dict["retweet_count"] = row["retweet_count"]
+#         data_dict["favorite_count"] = row["favorite_count"]
+#         graph_data_list.append(data_dict)
+
+    # response_list.append({
+    #     "user": user_name,
+    #     "retweet_average": retweet_average,
+    #     "favorite_average": favorite_average,
+    #     "total_tweets_retrieved": user_tweet_count,
+    #     "total_retweets_counted": user_retweet_total
+    # })
+
 
 
 @app.route('/fail')

@@ -224,7 +224,7 @@ function retweetGraphAAG(data) {
 
     console.log(retweetData);
     // retrieve keys for candidate names
-    var bands = retweetData.map(d => d['user']);
+    var bands = retweetData.map(d => d['user_name']);
     // retrieve average retweet data for candidates
     var retweetAverages = retweetData.map(d => d['retweet_average']);
 
