@@ -44,24 +44,24 @@ var height = svgHeight - margin.top - margin.bottom;
 
 // request tweet data from server API endpoint
 
-d3.json("/test", function(err, data) {
+d3.json("/init_data", function(err, data) {
     if (err) throw err;
 
     // Create retweet graph using retrieved data
-    retweetGraphAAG(data);
+    graphAAG(data);
     // Create favorite graph using retrieved data
     favoriteGraphAAG(data);
 
 });
 
 
-// Select "Retweet At a Glance" Checkboxes
+// Select "At a Glance" Checkboxes
 var bidenBox = d3.select("#joe-biden-checkbox");
 var bookerBox = d3.select("#cory-booker-checkbox");
-var buttigiegBox = d3.select("#pete-Buttigieg-checkbox");
+var buttigiegBox = d3.select("#pete-buttigieg-checkbox");
 var castroBox = d3.select("#julian-castro-checkbox");
 var delaneyBox = d3.select("#john-delaney-checkbox");
-var gabbardBox = d3.select("#tulsi-gabbard-box");
+var gabbardBox = d3.select("#tulsi-gabbard-checkbox");
 var gillibrandBox = d3.select("#kirsten-gillibrand-checkbox");
 var gravelBox = d3.select("#mike-gravel-checkbox");
 var harrisBox = d3.select("#kamala-harris-checkbox");
@@ -85,14 +85,19 @@ var blasioBox = d3.select("#bill-blasio-checkbox");
 var sestakBox = d3.select("#joe-sestak-checkbox");
 var steyerBox = d3.select("#tom-steyer-checkbox");
 
-// Select "retweet at a glance" Submit Button
-var retweetSubmit = d3.select(".retweet-submit");
+// Select "Retweets or Favorites Radio Buttons"
 
-// Create event listener for retweet submit button
-retweetSubmit.on("click", retweetSubmitClick);
+var retweetRadio = d3.select("#retweet-radio");
+var favoriteRadio = d3.select("#favorite-radio");
+
+// Select "at a glance" Submit Button
+var selectionSubmit = d3.select(".selection-submit");
+
+// Create event listener for submit button
+selectionSubmit.on("click", submitClick);
 
 // Create Button Click function
-function retweetSubmitClick() {
+function submitClick() {
     // Create list to append all checked candidates
     var candidateList = [];
     // Prevent the page from refreshing
@@ -101,88 +106,104 @@ function retweetSubmitClick() {
     ////////////////////////////////////////////////////
     // Append list with names whose boxes are checked
     if (bidenBox.property("checked")) {
-        candidateList.push("Joe Biden");
+        candidateList.push("939091");
     }
     if (bookerBox.property("checked")) {
-        candidateList.push("Cory Booker");
+        candidateList.push("15808765");
     }
     if (buttigiegBox.property("checked")) {
-        candidateList.push("Pete Buttigieg");
+        candidateList.push("226222147");
     }
     if (castroBox.property("checked")) {
-        candidateList.push("Julián Castro");
+        candidateList.push("19682187");
     }
     if (delaneyBox.property("checked")) {
-        candidateList.push("John Delaney");
+        candidateList.push("426028646");
     }
     if (gabbardBox.property("checked")) {
-        candidateList.push("Tulsi Gabbard");
+        candidateList.push("26637348");
     }
     if (gillibrandBox.property("checked")) {
-        candidateList.push("Kirsten Gillibrand");
+        candidateList.push("72198806");
     }
     if (gravelBox.property("checked")) {
-        candidateList.push("Mike Gravel");
+        candidateList.push("14709326");
     }
     if (harrisBox.property("checked")) {
-        candidateList.push("Kamala Harris");
+        candidateList.push("30354991");
     }
     if (hickenlooperBox.property("checked")) {
-        candidateList.push("John Hickenlooper");
+        candidateList.push("117839957");
     }
     if (insleeBox.property("checked")) {
-        candidateList.push("Jay Inslee");
+        candidateList.push("21789463");
     }
     if (klobucharBox.property("checked")) {
-        candidateList.push("Amy Klobuchar");
+        candidateList.push("33537967");
     }
     if (messamBox.property("checked")) {
-        candidateList.push("Wayne Messam");
+        candidateList.push("33954145");
     }
     if (moultonBox.property("checked")) {
-        candidateList.push("Seth Moulton");
+        candidateList.push("248495200");
     }
     if (rourkeBox.property("checked")) {
-        candidateList.push("Beto O'Rourke");
+        candidateList.push("342863309");
     }
     if (ryanBox.property("checked")) {
-        candidateList.push("Tim Ryan");
+        candidateList.push("466532637");
     }
     if (sandersBox.property("checked")) {
-        candidateList.push("Bernie Sanders");
+        candidateList.push("216776631");
     }
     if (trumpBox.property("checked")) {
-        candidateList.push("Donald Trump");
+        candidateList.push("25073877");
     }
     if (warrenBox.property("checked")) {
-        candidateList.push("Elizabeth Warren");
+        candidateList.push("357606935");
     }
     if (weldBox.property("checked")) {
-        candidateList.push("Bill Weld");
+        candidateList.push("734783792502575105");
     }
     if (williamsonBox.property("checked")) {
-        candidateList.push("Marianne Williamson");
+        candidateList.push("21522338");
     }
     if (yangBox.property("checked")) {
-        candidateList.push("Andrew Yang");
+        candidateList.push("2228878592");
     }
     if (swalwellBox.property("checked")) {
-        candidateList.push("Eric Swalwell");
+        candidateList.push("942156122");
     }
     if (bennetBox.property("checked")) {
-        candidateList.push("Michael Bennet");
+        candidateList.push("45645232");
     }
     if (bullockBox.property("checked")) {
-        candidateList.push("Steve Bullock");
+        candidateList.push("111721601");
     }
     if (blasioBox.property("checked")) {
-        candidateList.push("Bill De Blasio");
+        candidateList.push("476193064");
     }
     if (sestakBox.property("checked")) {
-        candidateList.push("Joe Sestak");
+        candidateList.push("46764631");
     }
     if (steyerBox.property("checked")) {
-        candidateList.push("Tom Steyer");
+        candidateList.push("949934436");
+    }
+
+    /////////////////////////////////////////////
+
+    // Check Aggregation Method Selected
+
+    /////////////////////////////////////////////
+
+    // Check Retweet/Favorite Selection
+
+    var metricVariable;
+
+    if (retweetRadio.property("checked")) {
+        metricVariable = "retweet_count";
+    } else {
+        metricVariable = "favorite_count";
     }
     /////////////////////////////////////////////
 
@@ -192,13 +213,42 @@ function retweetSubmitClick() {
 
     ////////////////////////////////////////////
 
-    filteredCandidatesData(candidateList);
+
+    filteredCandidatesData(candidateList, metricVariable);
 }
 
+// Function for filtering data based on filter selections
+function filteredCandidatesData(candidatesList, metricVariable) {
 
-// function filteredCandidatesData(candidates) {
-//     d3.json
-// }
+    d3.json("/filter", {
+        method: "POST",
+        body: JSON.stringify({
+            candidatesList: candidatesList,
+            metricVariable: metricVariable
+        })
+    }).then(json => {
+        console.log(json)
+        console.log(typeof json)
+    })
+    
+    // function(err, data) {
+    //     if (err) throw err;
+    //     console.log(data)
+    //     console.log(typeof data)
+    // })
+    // d3.json("/data", function(err, data) {
+    //     if (err) throw err;
+
+    //     var tweetData = JSON.parse(data);
+
+    //     var filteredData = tweetData.filter(function(d) {
+    //         return candidatesList.includes(d["user_id_str"]);
+    //     });
+
+
+
+    // })
+}
 
 
 // Create an SVG wrapper, append an SVG group that will hold our chart,
@@ -216,13 +266,19 @@ var chartGroupRetweetsAAG = svgRetweetsAAG.append("g")
 // Create color variable
 var colorBands = d3.scaleOrdinal(d3.schemeCategory20);
 
+// function groupData(data) {
 
-// Function to create graph for average retweets per candidate
-function retweetGraphAAG(data) {
+//     groupList = [];
+
+//     for 
+// }
+
+
+// Function to create initial AAG graph
+function graphAAG(data) {
     // transform data into applicable form
-    var retweetData = JSON.parse(data);
+    var initData = JSON.parse(data);
 
-    console.log(retweetData);
     // retrieve keys for candidate names
     var bands = retweetData.map(d => d['user_name']);
     // retrieve average retweet data for candidates
@@ -322,7 +378,7 @@ function favoriteGraphAAG(data) {
     // transform data into applicable form
     var favoriteData = JSON.parse(data);
     // retrieve keys for candidate names
-    var favoriteBands = favoriteData.map(d => d['user']);
+    var favoriteBands = favoriteData.map(d => d['user_name']);
     // retrieve average favorite data for candidates
     var favoriteAverages = favoriteData.map(d => d['favorite_average']);
 

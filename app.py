@@ -161,6 +161,8 @@ extended_payload = {
     'tweet_mode': 'extended'
 }
 
+
+
 #Set up routes
 @app.route('/')
 def index():
@@ -239,15 +241,87 @@ def index():
 
     return render_template('index.html')
 
-@app.route('/test')
-def test():
+@app.route('/init_data')
+def data():
+
+    # Create Session for reading/updating database
+    session = Session(engine)
+
+    # graph_data = session.query(Tweets).all()
+
+    # graph_data_list = []
+
+    # for row in graph_data:
+    #     data_dict = {}
+    #     data_dict["created_at"] = row.created_at
+    #     data_dict["tweet_id"] = row.tweet_id
+    #     data_dict["tweet_id_str"] = row.tweet_id_str
+    #     data_dict["full_text"] = row.full_text
+    #     data_dict["in_reply_to_status_id"] = row.in_reply_to_status_id
+    #     data_dict["in_reply_to_status_id_str"] = row.in_reply_to_status_id_str
+    #     data_dict["in_reply_to_user_id"] = row.in_reply_to_user_id
+    #     data_dict["in_reply_to_user_id_str"] = row.in_reply_to_user_id_str
+    #     data_dict["user_id"] = row.user_id
+    #     data_dict["user_id_str"] = row.user_id_str
+    #     data_dict["user_name"] = row.user_name
+    #     data_dict["user_screen_name"] = row.user_screen_name
+    #     data_dict["retweet_count"] = row.retweet_count
+    #     data_dict["favorite_count"] = row.favorite_count
+    #     graph_data_list.append(data_dict)
+
+
+    average_query = session.query(Tweets.user_name, func.avg(Tweets.retweet_count), func.avg(Tweets.favorite_count)).group_by(Tweets.user_name).all()
+
+    keys = ('user_name', 'retweet_average', 'favorite_average')
+
+    graph_data_list = [dict(zip(keys, values)) for values in average_query]
+
+    response_json = json.dumps(graph_data_list)
+
+    session.close()
+
+    return(jsonify(response_json))
+
+@app.route("/filter", methods = ["GET", "POST"])
+def filter():
+    if request.method == "POST":
+        #read data and convert to list of dictionary
+        data = request.data
+        filter_data = [json.loads(data.decode('utf-8'))]
+        candidate_ids = filter_data[0]["candidatesList"]
+        metric_variable = filter_data[0]["metricVariable"]
+
+        print(candidate_ids)
+        # print(type(candidate_ids[0]))
+
+        session = Session(engine)
+        # simple_query = session.query(Tweets).all()
+        # print(simple_query)
+        base_query = session.query(Tweets.user_name,
+            func.avg(Tweets.retweet_count),
+            func.avg(Tweets.favorite_count)).\
+            filter(Tweets.user_id_str.in_(candidate_ids)).\
+            group_by(Tweets.user_name).all()
+        print(base_query)
+        # filter_query = base_query.filter(Tweets.user_id_str in candidate_ids).all()
+        # print(filter_query)
+        # filter_average_query = filter_query(Tweets.user_name, func.avg(Tweets.retweet_count), func.avg(Tweets.favorite_count)).group_by(Tweets.user_name).all()
+
+        # keys = ('user_name', 'retweet_average', 'favorite_average')
+        # filter_data_list = [dict(zip(keys, values)) for values in filter_average_query]
+
+
+        decoded_json = json.dumps(filter_data)
+
+        return decoded_json
+
+
+@app.route("/foo")
+def foo():
 
     ### Fetch Timeline Data
 
     response_list = []
-
-    # Create Session for updating sql table
-    session = Session(engine)
 
     for x in range(len(candidates_list)):
 
@@ -354,78 +428,7 @@ def test():
             "total_retweets_counted": user_retweet_total
         })
 
-    graph_data = session.query(Tweets).all()
-
-    graph_data_list = []
-
-    for row in graph_data:
-        data_dict = {}
-        data_dict["created_at"] = row.created_at
-        data_dict["tweet_id"] = row.tweet_id
-        data_dict["tweet_id_str"] = row.tweet_id_str
-        data_dict["full_text"] = row.full_text
-        data_dict["in_reply_to_status_id"] = row.in_reply_to_status_id
-        data_dict["in_reply_to_status_id_str"] = row.in_reply_to_status_id_str
-        data_dict["in_reply_to_user_id"] = row.in_reply_to_user_id
-        data_dict["in_reply_to_user_id_str"] = row.in_reply_to_user_id_str
-        data_dict["user_id"] = row.user_id
-        data_dict["user_id_str"] = row.user_id_str
-        data_dict["user_name"] = row.user_name
-        data_dict["user_screen_name"] = row.user_screen_name
-        data_dict["retweet_count"] = row.retweet_count
-        data_dict["favorite_count"] = row.favorite_count
-        graph_data_list.append(data_dict)
-
-    response_json = json.dumps(graph_data_list)
-
-    return(jsonify(response_json))
-
-# @app.route("/foo")
-# def foo():
-
-#     session = Session(engine)
-
-#     candidate_query = session.query(Tweets.)
-
-#     for candidate in candidates_list:
-
-#         candidate_id = candidate["twitter_user_id"]
-
-#         candidate_query = session.query(Tweets).filter_by(user_id_str = candidate_id)
-
-        
-
-
-#     graph_data = session.query(Tweets).all()
-
-#     graph_data_list = []
-
-#     for row in graph_data:
-#         data_dict = {}
-#         data_dict["created_at"] = row["created_at"]
-#         data_dict["tweet_id"] = row["tweet_id"]
-#         data_dict["tweet_id_str"] = row["tweet_id_str"]
-#         data_dict["full_text"] = row["full_text"]
-#         data_dict["in_reply_to_status_id"] = row["in_reply_to_status_id"]
-#         data_dict["in_reply_to_status_id_str"] = row["in_reply_to_status_id_str"]
-#         data_dict["in_reply_to_user_id"] = row["in_reply_to_user_id"]
-#         data_dict["in_reply_to_user_id_str"] = row["in_reply_to_user_id_str"]
-#         data_dict["user_id"] = row["user_id"]
-#         data_dict["user_id_str"] = row["user_id_str"]
-#         data_dict["user_name"] = row["user_name"]
-#         data_dict["user_screen_name"] = row["user_screen_name"]
-#         data_dict["retweet_count"] = row["retweet_count"]
-#         data_dict["favorite_count"] = row["favorite_count"]
-#         graph_data_list.append(data_dict)
-
-    # response_list.append({
-    #     "user": user_name,
-    #     "retweet_average": retweet_average,
-    #     "favorite_average": favorite_average,
-    #     "total_tweets_retrieved": user_tweet_count,
-    #     "total_retweets_counted": user_retweet_total
-    # })
-
+    return "Hello"
 
 
 @app.route('/fail')
