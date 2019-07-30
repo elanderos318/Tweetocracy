@@ -86,9 +86,12 @@ var sestakBox = d3.select("#joe-sestak-checkbox");
 var steyerBox = d3.select("#tom-steyer-checkbox");
 
 // Select "Retweets or Favorites Radio Buttons"
-
 var retweetRadio = d3.select("#retweet-radio");
 var favoriteRadio = d3.select("#favorite-radio");
+
+// Select "Date From" and "Date To" Inputs
+var dateFromSelection = d3.select("#aag-date-from");
+var dateToSelection = d3.select("#aag-date-to");
 
 // Select "at a glance" Submit Button
 var selectionSubmit = d3.select(".selection-submit");
@@ -201,53 +204,56 @@ function submitClick() {
     var metricVariable;
 
     if (retweetRadio.property("checked")) {
-        metricVariable = "retweet_count";
+        metricVariable = "retweet_average";
     } else {
-        metricVariable = "favorite_count";
+        metricVariable = "favorite_average";
     }
     /////////////////////////////////////////////
 
     // Check Date Range Selected
+    var dateFrom;
+    var dateTo;
+    dateFrom = dateFromSelection.property("value");
+    dateTo = dateToSelection.property("value");
 
+    // Create time formatter
+    var formatTime = d3.timeFormat("%b %d, %Y %H %S");
 
+    if (!dateFrom) {
+        dateFrom = "Nov 06, 2017";
+    }
+    if (!dateTo) {
+        dateTo = formatTime(new Date);
+        }
+    console.log(dateFrom);
+    console.log(dateTo);
+    console.log(`Type: ${typeof dateTo}`)
 
     ////////////////////////////////////////////
 
 
-    filteredCandidatesData(candidateList, metricVariable);
+    filteredCandidatesData(candidateList, metricVariable, dateFrom, dateTo);
 }
 
 // Function for filtering data based on filter selections
-function filteredCandidatesData(candidatesList, metricVariable) {
+function filteredCandidatesData(candidatesList, metricVariable, dateFrom, dateTo) {
 
     d3.json("/filter", {
         method: "POST",
         body: JSON.stringify({
             candidatesList: candidatesList,
-            metricVariable: metricVariable
-        })
+            dateFrom: dateFrom,
+            dateTo: dateTo
+        }),
+        headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
     }).then(json => {
         console.log(json)
         console.log(typeof json)
     })
     
-    // function(err, data) {
-    //     if (err) throw err;
-    //     console.log(data)
-    //     console.log(typeof data)
-    // })
-    // d3.json("/data", function(err, data) {
-    //     if (err) throw err;
 
-    //     var tweetData = JSON.parse(data);
-
-    //     var filteredData = tweetData.filter(function(d) {
-    //         return candidatesList.includes(d["user_id_str"]);
-    //     });
-
-
-
-    // })
 }
 
 

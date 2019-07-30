@@ -2,6 +2,8 @@ import os
 
 import json
 
+import datetime as dt
+
 import requests
 from requests_oauthlib import OAuth1
 
@@ -270,7 +272,9 @@ def data():
     #     graph_data_list.append(data_dict)
 
 
-    average_query = session.query(Tweets.user_name, func.avg(Tweets.retweet_count), func.avg(Tweets.favorite_count)).group_by(Tweets.user_name).all()
+    average_query = session.query(Tweets.user_name, 
+        func.avg(Tweets.retweet_count), 
+        func.avg(Tweets.favorite_count)).group_by(Tweets.user_name).all()
 
     keys = ('user_name', 'retweet_average', 'favorite_average')
 
@@ -289,31 +293,42 @@ def filter():
         data = request.data
         filter_data = [json.loads(data.decode('utf-8'))]
         candidate_ids = filter_data[0]["candidatesList"]
-        metric_variable = filter_data[0]["metricVariable"]
+        date_from = filter_data[0]["dateFrom"]
+        date_to = filter_data[0]["dateTo"]
 
-        print(candidate_ids)
-        # print(type(candidate_ids[0]))
+        date_from_object = dt.datetime.strptime(date_from, "%b %d, %Y")
 
         session = Session(engine)
-        # simple_query = session.query(Tweets).all()
-        # print(simple_query)
-        base_query = session.query(Tweets.user_name,
+
+        print(date_from_object)
+
+        sample_query = session.query(Tweets.user_name, Tweets.created_at).\
+            filter(Tweets.user_id_str.in_(candidate_ids)).\
+            filter(Tweets.created_at > date_from_object).all()
+        print(sample_query)
+        
+        filter_query = session.query(Tweets.user_name,
+            Tweets.created_at,
             func.avg(Tweets.retweet_count),
             func.avg(Tweets.favorite_count)).\
             filter(Tweets.user_id_str.in_(candidate_ids)).\
+            filter(Tweets.created_at > date_from_object).\
             group_by(Tweets.user_name).all()
-        print(base_query)
-        # filter_query = base_query.filter(Tweets.user_id_str in candidate_ids).all()
-        # print(filter_query)
-        # filter_average_query = filter_query(Tweets.user_name, func.avg(Tweets.retweet_count), func.avg(Tweets.favorite_count)).group_by(Tweets.user_name).all()
 
-        # keys = ('user_name', 'retweet_average', 'favorite_average')
-        # filter_data_list = [dict(zip(keys, values)) for values in filter_average_query]
+            #'Thu Jul 25 21:14:50 +0000 2019'
+            #filter(Tweets.created_at < date_to).\
+            #dt.datetime.strptime(Tweets.created_at, "%a %b %d %H:%M:%S %z %Y")
+
+    
+        keys = ('user_name', 'created_at', 'retweet_average', 'favorite_average')
+        filter_list = [dict(zip(keys, values)) for values in filter_query]
 
 
-        decoded_json = json.dumps(filter_data)
+        filter_json = json.dumps(filter_list)
 
-        return decoded_json
+        session.close()
+
+        return filter_json
 
 
 @app.route("/foo")
