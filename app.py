@@ -292,35 +292,26 @@ def filter():
         #read data and convert to list of dictionary
         data = request.data
         filter_data = [json.loads(data.decode('utf-8'))]
+
+        # retrieve data variables
         candidate_ids = filter_data[0]["candidatesList"]
         date_from = filter_data[0]["dateFrom"]
         date_to = filter_data[0]["dateTo"]
 
         date_from_object = dt.datetime.strptime(date_from, "%b %d, %Y")
+        date_to_object = dt.datetime.strptime(date_to, "%b %d, %Y") + dt.timedelta(days = 1)
 
         session = Session(engine)
-
-        print(date_from_object)
-
-        sample_query = session.query(Tweets.user_name, Tweets.created_at).\
-            filter(Tweets.user_id_str.in_(candidate_ids)).\
-            filter(Tweets.created_at > date_from_object).all()
-        print(sample_query)
         
         filter_query = session.query(Tweets.user_name,
-            Tweets.created_at,
             func.avg(Tweets.retweet_count),
             func.avg(Tweets.favorite_count)).\
             filter(Tweets.user_id_str.in_(candidate_ids)).\
-            filter(Tweets.created_at > date_from_object).\
+            filter(Tweets.created_at_datetime >= date_from_object).\
+            filter(Tweets.created_at_datetime < date_to_object).\
             group_by(Tweets.user_name).all()
-
-            #'Thu Jul 25 21:14:50 +0000 2019'
-            #filter(Tweets.created_at < date_to).\
-            #dt.datetime.strptime(Tweets.created_at, "%a %b %d %H:%M:%S %z %Y")
-
     
-        keys = ('user_name', 'created_at', 'retweet_average', 'favorite_average')
+        keys = ('user_name', 'retweet_average', 'favorite_average')
         filter_list = [dict(zip(keys, values)) for values in filter_query]
 
 
@@ -331,8 +322,20 @@ def filter():
         return filter_json
 
 
+def convert(date_string):
+#     datetime_object = date_string[-4:] + "-" + dt.datetime.strftime(dt.datetime.strptime(date_string[4:7], "%b"), "%m") + \
+#         "-" + date_string[8:10]
+    datetime_object = dt.datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+    print(datetime_object)
+    print(type(datetime_object))
+    # datetime_string = dt.datetime.strftime(datetime_object, "%Y-%m-%d")
+    # print(datetime_string)
+    return datetime_object
+
 @app.route("/foo")
 def foo():
+
+    session = Session(engine)
 
     ### Fetch Timeline Data
 
@@ -342,9 +345,6 @@ def foo():
 
         candidate_name = candidates_list[x]['name']
         candidate_id = candidates_list[x]["twitter_user_id"]
-
-        # if user_name == "Donald Trump":
-        #     continue
 
         print(f'Retrieving Data for {candidate_name}')
 
@@ -356,8 +356,6 @@ def foo():
         user_tweet_count = 0
         user_retweet_total = 0
         user_favorite_total = 0
-        passed_tweets = 0
-        
 
         for tweet in user_json:
             
@@ -368,7 +366,6 @@ def foo():
             # We do not count retweets as user tweets. If retweeted_stats is true, we will continue to the next iteration
             try:
                 tweet["retweeted_status"]
-                passed_tweets = passed_tweets + 1
                 continue
             except KeyError:
                 pass
@@ -384,6 +381,7 @@ def foo():
             #         passed_tweets = passed_tweets + 1
             #         continue
             
+
 
             # Store relevant information in variables
             created_at = tweet["created_at"]
@@ -401,17 +399,18 @@ def foo():
             retweet_count = tweet["retweet_count"]
             favorite_count = tweet["favorite_count"]
 
+            created_at_datetime = convert(created_at)
+
             # Query the sql table and look for tweet_id_str
 
             tweet_query = session.query(Tweets)
 
             if tweet_query.filter_by(tweet_id_str = tweet_id_str).count() > 0:
                 print("existing tweet")
-                # current_tweet = tweet_query.filter(Tweets.tweet_id_str == tweet_id_str).count()
-                # print(current_tweet)
             else:
                 print("adding tweet to db")
-                session.add(Tweets(created_at = created_at, tweet_id = tweet_id, tweet_id_str = tweet_id_str,
+                session.add(Tweets(created_at = created_at, created_at_datetime = created_at_datetime, 
+                    tweet_id = tweet_id, tweet_id_str = tweet_id_str,
                     full_text = full_text, in_reply_to_status_id = in_reply_to_status_id,
                     in_reply_to_status_id_str = in_reply_to_status_id_str,
                     in_reply_to_user_id = in_reply_to_user_id, in_reply_to_user_id_str = in_reply_to_user_id_str,
@@ -419,10 +418,6 @@ def foo():
                     retweet_count = retweet_count, favorite_count = favorite_count))
 
                 session.commit()
-            
-            # new_tweet_query = session.query(Tweets)
-            # for tweet in new_tweet_query:
-            #     print(tweet.tweet_id_str)
 
             ################################################
 
@@ -443,36 +438,15 @@ def foo():
             "total_retweets_counted": user_retweet_total
         })
 
-    return "Hello"
+    session.close()
+
+    response_json = json.dumps(response_list)
 
 
-@app.route('/fail')
-def fail():
-    return 'Fail!'
+    return response_json
 
 @app.route('/request_token')
 def request_token():
-
-    # production callback
-    # callback_url = "https://tweetocracy.herokuapp.com/"
-
-    # local testing
-    # payload = {
-    # 'oauth_callback':"http://127.0.0.1:5000/"
-    # }
-
-    # r = requests.post('https://api.twitter.com/oauth/request_token', auth = auth, data = payload)
-
-    # response_output = r.text
-    # print(response_output)
-    # response_parameters = response_output.split("&")
-
-    # oauth_token = response_parameters[0][12:]
-    # print(oauth_token)
-    # oauth_token_secret = response_parameters[1][19:]
-    # oauth_callback_confirmed = bool(response_parameters[2][25:])
-
-    # print(oauth_token)
     token_response_dict = {"oauth_token": oauth_token}
     return(jsonify(**token_response_dict))
 

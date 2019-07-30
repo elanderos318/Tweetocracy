@@ -27,6 +27,13 @@ bidenBox.on("click", function() {
 datePicker = d3.select(".datepicker");
 
 
+//// testing
+
+// d3.json("/foo", function(err, data) {
+//     if (err) throw err;
+
+//     console.log(data)
+// })
 
 // Set SVG Chart Formatting
 var svgHeight = 700;
@@ -217,7 +224,7 @@ function submitClick() {
     dateTo = dateToSelection.property("value");
 
     // Create time formatter
-    var formatTime = d3.timeFormat("%b %d, %Y %H %S");
+    var formatTime = d3.timeFormat("%b %d, %Y");
 
     if (!dateFrom) {
         dateFrom = "Nov 06, 2017";
