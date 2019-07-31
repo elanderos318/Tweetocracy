@@ -4,9 +4,7 @@ var twitterButton = d3.select(".twitter-button");
 twitterButton.on("click", getOauthAuthorize);
 // Fetch Request Token Data, then redirect to Twitter's Authorization page
 function getOauthAuthorize() {
-    console.log("yes")
-    d3.json("/request_token", function(err, data) {
-        if (err) throw err;
+    d3.json("/request_token").then(function(data) {
         var request_token = data["oauth_token"];
         window.location.replace(`https://api.twitter.com/oauth/authorize?oauth_token=${request_token}`)
     })
@@ -51,16 +49,12 @@ var height = svgHeight - margin.top - margin.bottom;
 
 // request tweet data from server API endpoint
 
-d3.json("/init_data", function(err, data) {
-    if (err) throw err;
-
-    // Create retweet graph using retrieved data
+d3.json("/init_data").then(function(data) {
+    // Create at a glance graph using retrieved data
     graphAAG(data);
-    // Create favorite graph using retrieved data
-    favoriteGraphAAG(data);
-
-});
-
+}).catch(function(e) {
+    console.log(e);
+})
 
 // Select "At a Glance" Checkboxes
 var bidenBox = d3.select("#joe-biden-checkbox");
@@ -92,6 +86,10 @@ var blasioBox = d3.select("#bill-blasio-checkbox");
 var sestakBox = d3.select("#joe-sestak-checkbox");
 var steyerBox = d3.select("#tom-steyer-checkbox");
 
+// Select Aggregation Method Buttons
+var meanRadio = d3.select("#mean-radio");
+var medianRadio = d3.select("#median-radio");
+
 // Select "Retweets or Favorites Radio Buttons"
 var retweetRadio = d3.select("#retweet-radio");
 var favoriteRadio = d3.select("#favorite-radio");
@@ -109,100 +107,108 @@ selectionSubmit.on("click", submitClick);
 // Create Button Click function
 function submitClick() {
     // Create list to append all checked candidates
-    var candidateList = [];
+    var candidatesList = [];
     // Prevent the page from refreshing
     d3.event.preventDefault();
 
     ////////////////////////////////////////////////////
     // Append list with names whose boxes are checked
     if (bidenBox.property("checked")) {
-        candidateList.push("939091");
+        candidatesList.push("939091");
     }
     if (bookerBox.property("checked")) {
-        candidateList.push("15808765");
+        candidatesList.push("15808765");
     }
     if (buttigiegBox.property("checked")) {
-        candidateList.push("226222147");
+        candidatesList.push("226222147");
     }
     if (castroBox.property("checked")) {
-        candidateList.push("19682187");
+        candidatesList.push("19682187");
     }
     if (delaneyBox.property("checked")) {
-        candidateList.push("426028646");
+        candidatesList.push("426028646");
     }
     if (gabbardBox.property("checked")) {
-        candidateList.push("26637348");
+        candidatesList.push("26637348");
     }
     if (gillibrandBox.property("checked")) {
-        candidateList.push("72198806");
+        candidatesList.push("72198806");
     }
     if (gravelBox.property("checked")) {
-        candidateList.push("14709326");
+        candidatesList.push("14709326");
     }
     if (harrisBox.property("checked")) {
-        candidateList.push("30354991");
+        candidatesList.push("30354991");
     }
     if (hickenlooperBox.property("checked")) {
-        candidateList.push("117839957");
+        candidatesList.push("117839957");
     }
     if (insleeBox.property("checked")) {
-        candidateList.push("21789463");
+        candidatesList.push("21789463");
     }
     if (klobucharBox.property("checked")) {
-        candidateList.push("33537967");
+        candidatesList.push("33537967");
     }
     if (messamBox.property("checked")) {
-        candidateList.push("33954145");
+        candidatesList.push("33954145");
     }
     if (moultonBox.property("checked")) {
-        candidateList.push("248495200");
+        candidatesList.push("248495200");
     }
     if (rourkeBox.property("checked")) {
-        candidateList.push("342863309");
+        candidatesList.push("342863309");
     }
     if (ryanBox.property("checked")) {
-        candidateList.push("466532637");
+        candidatesList.push("466532637");
     }
     if (sandersBox.property("checked")) {
-        candidateList.push("216776631");
+        candidatesList.push("216776631");
     }
     if (trumpBox.property("checked")) {
-        candidateList.push("25073877");
+        candidatesList.push("25073877");
     }
     if (warrenBox.property("checked")) {
-        candidateList.push("357606935");
+        candidatesList.push("357606935");
     }
     if (weldBox.property("checked")) {
-        candidateList.push("734783792502575105");
+        candidatesList.push("734783792502575105");
     }
     if (williamsonBox.property("checked")) {
-        candidateList.push("21522338");
+        candidatesList.push("21522338");
     }
     if (yangBox.property("checked")) {
-        candidateList.push("2228878592");
+        candidatesList.push("2228878592");
     }
     if (swalwellBox.property("checked")) {
-        candidateList.push("942156122");
+        candidatesList.push("942156122");
     }
     if (bennetBox.property("checked")) {
-        candidateList.push("45645232");
+        candidatesList.push("45645232");
     }
     if (bullockBox.property("checked")) {
-        candidateList.push("111721601");
+        candidatesList.push("111721601");
     }
     if (blasioBox.property("checked")) {
-        candidateList.push("476193064");
+        candidatesList.push("476193064");
     }
     if (sestakBox.property("checked")) {
-        candidateList.push("46764631");
+        candidatesList.push("46764631");
     }
     if (steyerBox.property("checked")) {
-        candidateList.push("949934436");
+        candidatesList.push("949934436");
     }
 
     /////////////////////////////////////////////
 
     // Check Aggregation Method Selected
+
+    var aggregationVariable;
+
+    if (meanRadio.property("checked")) {
+        aggregationVariable = "average";
+    } else {
+        aggregationVariable = "median";
+    }
 
     /////////////////////////////////////////////
 
@@ -212,12 +218,15 @@ function submitClick() {
 
     if (retweetRadio.property("checked")) {
         metricVariable = "retweet_average";
+        metricLabel = "Retweets";
     } else {
         metricVariable = "favorite_average";
+        metricLabel = "Favorites";
     }
     /////////////////////////////////////////////
 
     // Check Date Range Selected
+
     var dateFrom;
     var dateTo;
     dateFrom = dateFromSelection.property("value");
@@ -239,11 +248,11 @@ function submitClick() {
     ////////////////////////////////////////////
 
 
-    filteredCandidatesData(candidateList, metricVariable, dateFrom, dateTo);
+    filteredCandidatesData(candidatesList, metricVariable, aggregationVariable, dateFrom, dateTo);
 }
 
 // Function for filtering data based on filter selections
-function filteredCandidatesData(candidatesList, metricVariable, dateFrom, dateTo) {
+function filteredCandidatesData(candidatesList, metricVariable, aggregationVariable, dateFrom, dateTo) {
 
     d3.json("/filter", {
         method: "POST",
@@ -258,33 +267,143 @@ function filteredCandidatesData(candidatesList, metricVariable, dateFrom, dateTo
     }).then(json => {
         console.log(json)
         console.log(typeof json)
-    })
-    
 
+        var bands = json.map(d => d["user_name"]);
+        var score = json.map(d => d[metricVariable]);
+
+        // Generate new xaxis
+        xScaleBands = xBands(bands);
+        xBandsAxis = d3.select(".x-band-axis");
+        renderXBandsAxis(xScaleBands, xBandsAxis);
+        
+        // Generate new yaxis
+        yScaleBands = yBands(score);
+        yBandsAxis = d3.select(".y-band-axis");
+        renderYBandsAxis(yScaleBands, yBandsAxis);
+
+        renderRect(bands, xScaleBands, score, yScaleBands)
+    })
+}
+
+// Create Label for variable metric label display
+var metricLabel = "Retweets"
+// Select the title label
+var titleLabel = d3.select(".title-label");
+
+function renderRect(bands, xScaleBands, score, yScaleBands) {
+    var rectGroup = chartGroupAAG.selectAll("rect")
+        .data(score)
+
+        rectGroup.enter()
+        .append("rect")
+        .merge(rectGroup)
+        .style("fill", (d, i) => colorBands(i))
+        .style("stroke", "black")
+        .attr("x", (d, i) => xScaleBands(bands[i]))
+        .attr("y", d => yScaleBands(d))
+        .attr("width",xScaleBands.bandwidth())
+        .attr("height", d => height - yScaleBands(d))
+
+
+        rectGroup.exit().remove();
+
+        // titleLabel.enter()
+        // .data()
+        // .merge(titelLabel)
+        // .attr("transform", `translate(${width / 2}, -15)`)
+        // .attr("text-anchor", "middle")
+        // .attr("font-size", "30px")
+        // .attr("fill", "black")
+        // .attr("stroke", "black")
+        // .attr("stroke-width", "1.5px")
+        // .attr("font-family", "Lato")
+        // .classed("title-label", true)
+        // .text(`Average Number of ${metricLabel} per Candidate`);
+
+        // titleLabel.exit().remove();
+
+        titleLabel.text("Average Number of Favorites per Candidate");
+
+
+        // chartGroupAAG.append("text")
+        // .attr("transform", `translate(${width / 2}, -15)`)
+        // .attr("text-anchor", "middle")
+        // .attr("font-size", "30px")
+        // .attr("fill", "black")
+        // .attr("stroke", "black")
+        // .attr("stroke-width", "1.5px")
+        // .attr("font-family", "Lato")
+        // .classed("title-label", true)
+        // .text(`Average Number of ${metricLabel} per Candidate`);
+
+
+    return rectGroup;
+}
+
+// function used for updating y-scale var
+function yBands(score) {
+    var yScaleBands = d3.scaleLinear()
+        .domain([0, d3.max(score)])
+        .range([height, 0])
+
+    return yScaleBands;
+}
+
+// function used for updated Y Axis
+function renderYBandsAxis(yScaleBands, yBandsAxis) {
+    var leftAxis = d3.axisLeft(yScaleBands);
+
+    yBandsAxis.transition()
+        .duration(1000)
+        .call(leftAxis);
+
+    return yBandsAxis;
+}
+
+// function used for updating x-scale var
+function xBands(bands) {
+    // create scale
+    var xScaleBands = d3.scaleBand()
+        .domain(bands)
+        .range([0, width])
+        .padding(0);
+
+    return xScaleBands;
+}
+
+// function used for updated X Axis
+function renderXBandsAxis(xScaleBands, xBandsAxis) {
+    var bottomAxis = d3.axisBottom(xScaleBands);
+
+    xBandsAxis.transition()
+        .duration(1000)
+        .call(bottomAxis)
+        .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(90)")
+            .style("text-anchor", "start");
+
+    return xBandsAxis;
 }
 
 
 // Create an SVG wrapper, append an SVG group that will hold our chart,
 // and shift the latter by left and top margins.
-var svgRetweetsAAG = d3
-  .select(".at-a-glance-retweets")
+var svgAAG = d3
+  .select(".at-a-glance-graph")
   .append("svg")
   .attr("width", svgWidth)
   .attr("height", svgHeight);
 
   // Append an SVG group
-var chartGroupRetweetsAAG = svgRetweetsAAG.append("g")
+var chartGroupAAG = svgAAG.append("g")
 .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Create color variable
 var colorBands = d3.scaleOrdinal(d3.schemeCategory20);
 
-// function groupData(data) {
-
-//     groupList = [];
-
-//     for 
-// }
 
 
 // Function to create initial AAG graph
@@ -293,9 +412,9 @@ function graphAAG(data) {
     var initData = JSON.parse(data);
 
     // retrieve keys for candidate names
-    var bands = retweetData.map(d => d['user_name']);
+    var bands = initData.map(d => d['user_name']);
     // retrieve average retweet data for candidates
-    var retweetAverages = retweetData.map(d => d['retweet_average']);
+    var retweetAverages = initData.map(d => d['retweet_average']);
 
     // create scalar for retweet data
     var yScaleBands = d3.scaleLinear()
@@ -310,11 +429,11 @@ function graphAAG(data) {
     var xBandsAxis = d3.axisBottom(xScaleBands);
     var yBandsAxis = d3.axisLeft(yScaleBands);
     // append y axis
-    chartGroupRetweetsAAG.append("g")
+    chartGroupAAG.append("g")
         .classed("y-band-axis", true)
         .call(yBandsAxis);
     // append x axis and transform text for readability
-    chartGroupRetweetsAAG.append("g")
+    chartGroupAAG.append("g")
         .attr("transform", `translate(0, ${height})`)
         .classed("x-band-axis", true)
         .call(xBandsAxis)
@@ -326,8 +445,8 @@ function graphAAG(data) {
             .style("text-anchor", "start");
 
     // Append bars
-    var rectGroupRetweetsAAG = chartGroupRetweetsAAG.selectAll("rect")
-        .data(retweetData)
+    var rectGroupAAG = chartGroupAAG.selectAll("rect")
+        .data(initData)
         .enter()
         .append("rect")
         .attr("x", (d, i) => xScaleBands(bands[i]))
@@ -339,7 +458,7 @@ function graphAAG(data) {
         .style("fill", (d, i) => colorBands(i))
 
     // Append title
-    chartGroupRetweetsAAG.append("text")
+    chartGroupAAG.append("text")
         .attr("transform", `translate(${width / 2}, -15)`)
         .attr("text-anchor", "middle")
         .attr("font-size", "30px")
@@ -347,10 +466,11 @@ function graphAAG(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1.5px")
         .attr("font-family", "Lato")
-        .text("Average Number of Retweets per Candidate");
+        .classed("title-label", true)
+        .text(`Average Number of ${metricLabel} per Candidate`);
 
     // Append x axis label
-    chartGroupRetweetsAAG.append("text")
+    chartGroupAAG.append("text")
         .attr("transform", `translate(${width / 2}, ${height + 130})`)
         .attr("text-anchor", "middle")
         .attr("font-size", "18px")
@@ -361,7 +481,7 @@ function graphAAG(data) {
         .text("Candidate");
 
     // Append y axis label
-    chartGroupRetweetsAAG.append("text")
+    chartGroupAAG.append("text")
         .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
         .attr("y", "-50")
         .attr("text-anchor", "middle")
@@ -370,7 +490,8 @@ function graphAAG(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1px")
         .attr("font-family", "Roboto")
-        .text("Average Number of Retweets")
+        .classed("y-axis-label", true)
+        .text(`Average Number of ${metricLabel}`)
 }
 
 

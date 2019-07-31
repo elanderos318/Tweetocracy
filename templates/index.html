@@ -315,6 +315,41 @@
             <span class = "card-title">Select Aggregation Method:</span>
           </div>
 
+          <!--Card Action for Aggregation Method Selection-->
+          <div class = "card-action action-sub-panel">
+
+            <form>
+              <!--Choices will exist on separate columns-->
+              <div class = "row">
+                <!--Begin Column for Mean Selection-->
+                <div class = "col m6">
+
+                  <p>
+                    <label for = "mean-radio">
+                      <input class = "input-radio" id = "mean-radio" name = "aggregation-radio" type= 'radio' checked/>
+                      <span class = "input-text">Mean</span>
+                    </label>
+                  </p>
+
+                </div>
+                <!-- Begin Column for Median Selection-->
+                <div class = "col m6">
+
+                  <p>
+                    <label for = "median-radio">
+                      <input class = "input-radio" id = "median-radio" name = "aggregation-radio" type= 'radio' disabled/>
+                      <span class = "input-text">Median</span>
+                    </label>
+                  </p>
+
+                </div>
+
+
+              </div>
+            </form>
+
+          </div>
+
           <!--Card Content for Retweet/Favorite Selection-->
           <div class = "card-content white-text">
             <span class = "card-title">Select Retweets or Favorites:</span>
@@ -379,7 +414,7 @@
 
       <!--div column for graph-->
       <div class = "col m9">
-        <div class = "at-a-glance-retweets"></div>
+        <div class = "at-a-glance-graph"></div>
       </div>
 
     </div>

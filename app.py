@@ -282,9 +282,11 @@ def data():
 
     response_json = json.dumps(graph_data_list)
 
+    print(response_json)
+
     session.close()
 
-    return(jsonify(response_json))
+    return jsonify(response_json)
 
 @app.route("/filter", methods = ["GET", "POST"])
 def filter():
