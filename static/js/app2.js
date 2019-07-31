@@ -104,6 +104,9 @@ var selectionSubmit = d3.select(".selection-submit");
 // Create event listener for submit button
 selectionSubmit.on("click", submitClick);
 
+// Create Label for variable metric label display
+var metricLabel = "Retweets"
+
 // Create Button Click function
 function submitClick() {
     // Create list to append all checked candidates
@@ -271,6 +274,11 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
         var bands = json.map(d => d["user_name"]);
         var score = json.map(d => d[metricVariable]);
 
+        // Select Title Label
+        var titleLabel = d3.select(".title-label");
+        // Select Y Axis Label
+        var yAxisLabel = d3.select(".y-axis-label");
+
         // Generate new xaxis
         xScaleBands = xBands(bands);
         xBandsAxis = d3.select(".x-band-axis");
@@ -281,16 +289,13 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
         yBandsAxis = d3.select(".y-band-axis");
         renderYBandsAxis(yScaleBands, yBandsAxis);
 
-        renderRect(bands, xScaleBands, score, yScaleBands)
+        renderRect(bands, xScaleBands, score, yScaleBands, titleLabel, yAxisLabel)
     })
 }
 
-// Create Label for variable metric label display
-var metricLabel = "Retweets"
-// Select the title label
-var titleLabel = d3.select(".title-label");
 
-function renderRect(bands, xScaleBands, score, yScaleBands) {
+
+function renderRect(bands, xScaleBands, score, yScaleBands, titleLabel, yAxisLabel) {
     var rectGroup = chartGroupAAG.selectAll("rect")
         .data(score)
 
@@ -307,35 +312,13 @@ function renderRect(bands, xScaleBands, score, yScaleBands) {
 
         rectGroup.exit().remove();
 
-        // titleLabel.enter()
-        // .data()
-        // .merge(titelLabel)
-        // .attr("transform", `translate(${width / 2}, -15)`)
-        // .attr("text-anchor", "middle")
-        // .attr("font-size", "30px")
-        // .attr("fill", "black")
-        // .attr("stroke", "black")
-        // .attr("stroke-width", "1.5px")
-        // .attr("font-family", "Lato")
-        // .classed("title-label", true)
-        // .text(`Average Number of ${metricLabel} per Candidate`);
+        titleLabel.transition()
+            .duration(1000)
+            .text(`Average Number of ${metricLabel} per Candidate`);
 
-        // titleLabel.exit().remove();
-
-        titleLabel.text("Average Number of Favorites per Candidate");
-
-
-        // chartGroupAAG.append("text")
-        // .attr("transform", `translate(${width / 2}, -15)`)
-        // .attr("text-anchor", "middle")
-        // .attr("font-size", "30px")
-        // .attr("fill", "black")
-        // .attr("stroke", "black")
-        // .attr("stroke-width", "1.5px")
-        // .attr("font-family", "Lato")
-        // .classed("title-label", true)
-        // .text(`Average Number of ${metricLabel} per Candidate`);
-
+        yAxisLabel.transition()
+            .duration(1000)
+            .text(`Average Number of ${metricLabel}`);
 
     return rectGroup;
 }
@@ -492,102 +475,4 @@ function graphAAG(data) {
         .attr("font-family", "Roboto")
         .classed("y-axis-label", true)
         .text(`Average Number of ${metricLabel}`)
-}
-
-
-// Create an SVG wrapper, append an SVG group that will hold our chart,
-// and shift the latter by left and top margins.
-var svgFavoritesAAG = d3
-  .select(".at-a-glance-favorites")
-  .append("svg")
-  .attr("width", svgWidth)
-  .attr("height", svgHeight);
-
-// Append an SVG group
-var chartGroupFavoritesAAG = svgFavoritesAAG.append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-// Function to create graph for average favorites per candidate
-function favoriteGraphAAG(data) {
-    // transform data into applicable form
-    var favoriteData = JSON.parse(data);
-    // retrieve keys for candidate names
-    var favoriteBands = favoriteData.map(d => d['user_name']);
-    // retrieve average favorite data for candidates
-    var favoriteAverages = favoriteData.map(d => d['favorite_average']);
-
-    // create scalar for favorite data
-    var yScaleBandsFavorites = d3.scaleLinear()
-        .domain([0, d3.max(favoriteAverages)])
-        .range([height, 0])
-    // create scalar for candidate classifier
-    var xScaleBandsFavorites = d3.scaleBand()
-        .domain(favoriteBands)
-        .range([0, width])
-        .padding(0);
-    // create axis
-    var xBandsAxisFavorites = d3.axisBottom(xScaleBandsFavorites);
-    var yBandsAxisFavorites = d3.axisLeft(yScaleBandsFavorites);
-    // append y axis
-    chartGroupFavoritesAAG.append("g")
-        .classed("y-band-axis", true)
-        .call(yBandsAxisFavorites);
-    // append x axis and transform text for readability
-    chartGroupFavoritesAAG.append("g")
-        .attr("transform", `translate(0, ${height})`)
-        .classed("x-band-axis", true)
-        .call(xBandsAxisFavorites)
-        .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 9)
-            .attr("dy", ".35em")
-            .attr("transform", "rotate(90)")
-            .style("text-anchor", "start");
-
-    // Append bars
-    var rectGroupFavoritesAAG = chartGroupFavoritesAAG.selectAll("rect")
-        .data(favoriteData)
-        .enter()
-        .append("rect")
-        .attr("x", (d, i) => xScaleBandsFavorites(favoriteBands[i]))
-        .attr("y", d => yScaleBandsFavorites(d['favorite_average']))
-        .attr("width", xScaleBandsFavorites.bandwidth())
-        .attr("height", d => height - yScaleBandsFavorites(d['favorite_average']))
-        .classed("bandsData", true)
-        .style("stroke", "black")
-        .style("fill", (d, i) => colorBands(i))
-
-    // Append title
-    chartGroupFavoritesAAG.append("text")
-        .attr("transform", `translate(${width / 2}, -15)`)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "30px")
-        .attr("fill", "black")
-        .attr("stroke", "black")
-        .attr("stroke-width", "1.5px")
-        .attr("font-family", "Lato")
-        .text("Average Number of Favorites per Candidate");
-
-    // Append x axis label
-    chartGroupFavoritesAAG.append("text")
-        .attr("transform", `translate(${width / 2}, ${height + 130})`)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "18px")
-        .attr("fill", "black")
-        .attr("stroke", "black")
-        .attr("stroke-width", "1px")
-        .attr("font-family", "Roboto")
-        .text("Candidate");
-
-    // Append y axis label
-    chartGroupFavoritesAAG.append("text")
-        .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
-        .attr("y", "-50")
-        .attr("text-anchor", "middle")
-        .attr("font-size", "18px")
-        .attr("fill", d3.rgb(150,150,150))
-        .attr("stroke", "black")
-        .attr("stroke-width", "1px")
-        .attr("font-family", "Roboto")
-        .text("Average Number of Favorites")
 }
