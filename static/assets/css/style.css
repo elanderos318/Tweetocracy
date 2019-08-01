@@ -47,6 +47,16 @@ font-weight: 600;
 font-weight: 400;
 }
 
+/* Filter Bar CSS */
+
+/* .aag-container {
+    position: relative !important;
+}
+
+.filter-bar {
+    height: .01em !important;
+} */
+
 /* Graph Panel CSS */
 
 .action-panel {

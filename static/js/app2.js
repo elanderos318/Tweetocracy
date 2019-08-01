@@ -238,11 +238,14 @@ function submitClick() {
     // Create time formatter
     var formatTime = d3.timeFormat("%b %d, %Y");
 
+    var currentDate = new Date();
+    var monthAgo = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()); 
+
     if (!dateFrom) {
-        dateFrom = "Nov 06, 2017";
+        dateFrom = formatTime(monthAgo);
     }
     if (!dateTo) {
-        dateTo = formatTime(new Date);
+        dateTo = formatTime(currentDate);
         }
     console.log(dateFrom);
     console.log(dateTo);
@@ -291,6 +294,23 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
 
         renderRect(bands, xScaleBands, score, yScaleBands, titleLabel, yAxisLabel)
     })
+
+
+    // d3.json("/moving_average", {
+    //     method: "POST",
+    //     body: JSON.stringify({
+    //         candidatesList: candidatesList,
+    //         dateFrom: dateFrom,
+    //         dateTo: dateTo
+    //     }),
+    //     headers: {
+    //         "Content-type": "application/json; charset=UTF-8"
+    //       }
+    // }).then(json => {
+    //     console.log(json)
+    //     console.log(typeof json)
+
+    // })
 }
 
 
@@ -476,3 +496,105 @@ function graphAAG(data) {
         .classed("y-axis-label", true)
         .text(`Average Number of ${metricLabel}`)
 }
+
+// Create an SVG wrapper, append an SVG group that will hold our chart,
+// and shift the latter by left and top margins.
+var svgMA = d3
+  .select(".moving-average-graph")
+  .append("svg")
+  .attr("width", svgWidth)
+  .attr("height", svgHeight);
+
+  // Append an SVG group
+// var chartGroupMA = svgMA.append("g")
+// .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+// function graphMA(data) {
+
+//     // transform data into applicable form
+//     var initMA = JSON.parse(data);
+
+//     // retrieve keys for candidate names
+//     var bands = initData.map(d => d['user_name']);
+//     // retrieve average retweet data for candidates
+//     var retweetAverages = initData.map(d => d['retweet_average']);
+
+//     // create scalar for retweet data
+//     var yScaleBands = d3.scaleLinear()
+//         .domain([0, d3.max(retweetAverages)])
+//         .range([height, 0])
+//     // create scalar for candidate classifier
+//     var xScaleBands = d3.scaleBand()
+//         .domain(bands)
+//         .range([0, width])
+//         .padding(0);
+//     // create axis
+//     var xBandsAxis = d3.axisBottom(xScaleBands);
+//     var yBandsAxis = d3.axisLeft(yScaleBands);
+//     // append y axis
+//     chartGroupAAG.append("g")
+//         .classed("y-band-axis", true)
+//         .call(yBandsAxis);
+//     // append x axis and transform text for readability
+//     chartGroupAAG.append("g")
+//         .attr("transform", `translate(0, ${height})`)
+//         .classed("x-band-axis", true)
+//         .call(xBandsAxis)
+//         .selectAll("text")
+//             .attr("y", 0)
+//             .attr("x", 9)
+//             .attr("dy", ".35em")
+//             .attr("transform", "rotate(90)")
+//             .style("text-anchor", "start");
+
+//     // Append bars
+//     var rectGroupAAG = chartGroupAAG.selectAll("rect")
+//         .data(initData)
+//         .enter()
+//         .append("rect")
+//         .attr("x", (d, i) => xScaleBands(bands[i]))
+//         .attr("y", d => yScaleBands(d['retweet_average']))
+//         .attr("width", xScaleBands.bandwidth())
+//         .attr("height", d => height - yScaleBands(d['retweet_average']))
+//         .classed("bandsData", true)
+//         .style("stroke", "black")
+//         .style("fill", (d, i) => colorBands(i))
+
+//     // Append title
+//     chartGroupAAG.append("text")
+//         .attr("transform", `translate(${width / 2}, -15)`)
+//         .attr("text-anchor", "middle")
+//         .attr("font-size", "30px")
+//         .attr("fill", "black")
+//         .attr("stroke", "black")
+//         .attr("stroke-width", "1.5px")
+//         .attr("font-family", "Lato")
+//         .classed("title-label", true)
+//         .text(`Average Number of ${metricLabel} per Candidate`);
+
+//     // Append x axis label
+//     chartGroupAAG.append("text")
+//         .attr("transform", `translate(${width / 2}, ${height + 130})`)
+//         .attr("text-anchor", "middle")
+//         .attr("font-size", "18px")
+//         .attr("fill", "black")
+//         .attr("stroke", "black")
+//         .attr("stroke-width", "1px")
+//         .attr("font-family", "Roboto")
+//         .text("Candidate");
+
+//     // Append y axis label
+//     chartGroupAAG.append("text")
+//         .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
+//         .attr("y", "-50")
+//         .attr("text-anchor", "middle")
+//         .attr("font-size", "18px")
+//         .attr("fill", d3.rgb(150,150,150))
+//         .attr("stroke", "black")
+//         .attr("stroke-width", "1px")
+//         .attr("font-family", "Roboto")
+//         .classed("y-axis-label", true)
+//         .text(`Average Number of ${metricLabel}`)
+// }
+
+// }

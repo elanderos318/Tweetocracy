@@ -81,8 +81,10 @@
 
   <div class = "divider"></div>
 
-    <div class = "row section valign-wrapper">
-      <div class = "col m3">
+    <div class = "row section valign-wrapper aag-container">
+
+
+      <div class = "col m3 filter-bar">
 
         <div class = "card action-panel">
 
@@ -361,7 +363,7 @@
             <form>
               <!--Choices will exist on separate columns-->
               <div class = "row">
-                <!--Begin Column for Retweet/Favorite Selection-->
+                <!--Begin Column for Retweet Selection-->
                 <div class = "col m6">
 
                   <p>
@@ -371,16 +373,9 @@
                     </label>
                   </p>
 
-                  <p>
-                    <label for = "favorite-radio">
-                      <input class = "input-radio" id = "favorite-radio" name = "aag-radio" type= 'radio' />
-                      <span class = "input-text">Favorites</span>
-                    </label>
-                  </p>
-
                 </div>
                 
-                <!-- Begin Column for Tweets/Hour, Tweets/Day Selection-->
+                <!-- Begin Column for Favorite Selection-->
                 <div class = "col m6">
 
                   <p>
@@ -423,18 +418,13 @@
       <!--div column for graph-->
       <div class = "col m9">
         <div class = "at-a-glance-graph"></div>
+        <div class = "moving-average-graph"></div>
       </div>
 
     </div>
 
 
   <div class = "divider"></div>
-
-  <div class = "container">
-      <div class = "row">
-        <div class = "at-a-glance-favorites"></div>
-    </div>
-  </div>
 
   <!-- <div class = "secti" -->
 
