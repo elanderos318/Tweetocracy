@@ -288,40 +288,109 @@ def data():
 
     return jsonify(response_json)
 
-# @app.route("/moving_average")
-# def moving_average():
-#     #read data and convert to list of dictionary
-#     ma_data = request.data
-#     ma_filter_data = [json.loads(ma_data.decode('utf-8'))]
+@app.route("/moving_average_init")
+def moving_average_init():
 
-#     # retrieve data variables
-#     ma_candidate_ids = ma_filter_data[0]["candidatesList"]
-#     ma_date_from = ma_filter_data[0]["dateFrom"]
-#     ma_date_to = ma_filter_data[0]["dateTo"]
+    today_date = dt.date.today()
+    thirty_days_ago = dt.date.today() - dt.timedelta(days = 30)
 
-#     # Convert string dates into DATE objects
-#     ma_date_from_object = dt.date.strptime(ma_date_from, "%b %d, %Y")
-#     ma_date_to_object = dt.date.strptime(ma_date_to, "%b %d, %Y")
+    time_delta = today_date - thirty_days_ago + dt.timedelta(days = 1)
+    days_back = dt.timedelta(days = 10)
 
-#     time_delta = ma_date_to_object - ma_date_from_object + dt.timedelta(days = 1)
-#     two_hundred_day = dt.timedeta(days = 200)
+    session = Session(engine)
 
-#     session = Session(engine)
+    moving_average_list = []
 
-#     for candidate in ma_candidate_ids:
+    for candidate in candidates_list:
 
-#         for day in range(0, time_delta.days):
+        for days in range(0, time_delta.days):
 
-#             moving_average_query = session.query(Tweets.user_name,
-#                 func.avg(Tweets.retweet_count),
-#                 func.avg(Tweets.favorite_count)).\
-#                 filter(Tweets.user_id_str == candidate).\
-#                 filter(Tweets.created_at_datetime >= )
+            current_date = thirty_days_ago + dt.timedelta(days= days)
 
-#     moving_average_query = session.query(Tweets.user_name).\
-#         filter(Tweets.user_id_str.in_(candidate_ids)).\
-#         filter(Tweets.created_at_datetime >= date_from_object).\
-#         filter(Tweets.created_at_datetime < date_to_object).all()
+            current_date_str = dt.date.strftime(current_date, "%Y-%m-%d")
+
+            moving_average_query = session.query(Tweets.user_name,
+                func.avg(Tweets.retweet_count),
+                func.avg(Tweets.favorite_count)).\
+                filter(Tweets.user_id_str == candidate["twitter_user_id"]).\
+                filter(Tweets.created_at_date > (current_date - days_back)).\
+                filter(Tweets.created_at_date <= current_date).first()
+
+            print(moving_average_query)
+
+            keys = ("user_name", "retweet_moving_average", "favorite_moving_average")
+
+            moving_average_dict = dict(zip(keys, moving_average_query))
+
+            moving_average_dict["moving_average_date"] = current_date_str
+
+            moving_average_list.append(moving_average_dict)
+
+    
+    print(moving_average_list)
+    moving_average_json = json.dumps(moving_average_list)
+
+    return moving_average_json
+
+@app.route("/moving_average_filter", methods = ["GET", "POST"])
+def moving_average_filter():
+    #read data and convert to list of dictionary
+    ma_data = request.data
+    ma_filter_data = [json.loads(ma_data.decode('utf-8'))]
+
+    # retrieve data variables
+    ma_candidate_ids = ma_filter_data[0]["candidatesList"]
+    ma_date_from = ma_filter_data[0]["dateFrom"]
+    ma_date_to = ma_filter_data[0]["dateTo"]
+
+    # Convert string dates into DATETIME objects
+    datetime_from = dt.datetime.strptime(ma_date_from, "%b %d, %Y")
+    datetime_to = dt.datetime.strptime(ma_date_to, "%b %d, %Y")
+
+    #convert DATETIME objects into DATE objects
+    ma_date_from_object = datetime_from.date()
+    ma_date_to_object = datetime_to.date()
+
+    time_delta = ma_date_to_object - ma_date_from_object + dt.timedelta(days = 1)
+    days_back = dt.timedelta(days = 10)
+
+    session = Session(engine)
+
+    moving_average_list = []
+
+    for candidate in ma_candidate_ids:
+
+        for days in range(0, time_delta.days):
+
+            current_date = ma_date_from_object + dt.timedelta(days= days)
+
+            current_date_str = dt.date.strftime(current_date, "%Y-%m-%d")
+
+            moving_average_query = session.query(Tweets.user_name,
+                func.avg(Tweets.retweet_count),
+                func.avg(Tweets.favorite_count)).\
+                filter(Tweets.user_id_str == candidate).\
+                filter(Tweets.created_at_date > (current_date - days_back)).\
+                filter(Tweets.created_at_date <= current_date).first()
+
+            print(moving_average_query)
+
+            keys = ("user_name", "retweet_moving_average", "favorite_moving_average")
+
+            moving_average_dict = dict(zip(keys, moving_average_query))
+
+            moving_average_dict["moving_average_date"] = current_date_str
+
+            moving_average_list.append(moving_average_dict)
+
+    
+    print(moving_average_list)
+
+    session.close()
+
+    moving_average_json = json.dumps(moving_average_list)
+
+    return moving_average_json
 
 
 

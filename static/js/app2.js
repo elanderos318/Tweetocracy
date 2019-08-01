@@ -56,6 +56,12 @@ d3.json("/init_data").then(function(data) {
     console.log(e);
 })
 
+d3.json("/moving_average_init").then(function(data) {
+    graphMA(data);
+}).catch(function(e) {
+    console.log(e);
+})
+
 // Select "At a Glance" Checkboxes
 var bidenBox = d3.select("#joe-biden-checkbox");
 var bookerBox = d3.select("#cory-booker-checkbox");
@@ -296,21 +302,21 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
     })
 
 
-    // d3.json("/moving_average", {
-    //     method: "POST",
-    //     body: JSON.stringify({
-    //         candidatesList: candidatesList,
-    //         dateFrom: dateFrom,
-    //         dateTo: dateTo
-    //     }),
-    //     headers: {
-    //         "Content-type": "application/json; charset=UTF-8"
-    //       }
-    // }).then(json => {
-    //     console.log(json)
-    //     console.log(typeof json)
+    d3.json("/moving_average_filter", {
+        method: "POST",
+        body: JSON.stringify({
+            candidatesList: candidatesList,
+            dateFrom: dateFrom,
+            dateTo: dateTo
+        }),
+        headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+    }).then(json => {
+        console.log(json)
+        console.log(typeof json)
 
-    // })
+    })
 }
 
 
@@ -505,96 +511,184 @@ var svgMA = d3
   .attr("width", svgWidth)
   .attr("height", svgHeight);
 
-  // Append an SVG group
-// var chartGroupMA = svgMA.append("g")
-// .attr("transform", `translate(${margin.left}, ${margin.top})`);
+//   Append an SVG group
+var chartGroupMA = svgMA.append("g")
+.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-// function graphMA(data) {
+function candidateGroup(data) {
+    var candidatesAllNames = data.map(d => d["user_name"]);
 
-//     // transform data into applicable form
-//     var initMA = JSON.parse(data);
+    var candidatesUniqueNames = [...new Set(candidatesAllNames)]; 
 
-//     // retrieve keys for candidate names
-//     var bands = initData.map(d => d['user_name']);
-//     // retrieve average retweet data for candidates
-//     var retweetAverages = initData.map(d => d['retweet_average']);
+    // console.log(candidatesUniqueNames);
 
-//     // create scalar for retweet data
-//     var yScaleBands = d3.scaleLinear()
-//         .domain([0, d3.max(retweetAverages)])
-//         .range([height, 0])
-//     // create scalar for candidate classifier
-//     var xScaleBands = d3.scaleBand()
-//         .domain(bands)
-//         .range([0, width])
-//         .padding(0);
-//     // create axis
-//     var xBandsAxis = d3.axisBottom(xScaleBands);
-//     var yBandsAxis = d3.axisLeft(yScaleBands);
-//     // append y axis
-//     chartGroupAAG.append("g")
-//         .classed("y-band-axis", true)
-//         .call(yBandsAxis);
-//     // append x axis and transform text for readability
-//     chartGroupAAG.append("g")
-//         .attr("transform", `translate(0, ${height})`)
-//         .classed("x-band-axis", true)
-//         .call(xBandsAxis)
-//         .selectAll("text")
-//             .attr("y", 0)
-//             .attr("x", 9)
-//             .attr("dy", ".35em")
-//             .attr("transform", "rotate(90)")
-//             .style("text-anchor", "start");
+    var lineList = [];
 
-//     // Append bars
-//     var rectGroupAAG = chartGroupAAG.selectAll("rect")
-//         .data(initData)
-//         .enter()
-//         .append("rect")
-//         .attr("x", (d, i) => xScaleBands(bands[i]))
-//         .attr("y", d => yScaleBands(d['retweet_average']))
-//         .attr("width", xScaleBands.bandwidth())
-//         .attr("height", d => height - yScaleBands(d['retweet_average']))
-//         .classed("bandsData", true)
-//         .style("stroke", "black")
-//         .style("fill", (d, i) => colorBands(i))
+    for (let i = 0; i < candidatesUniqueNames.length; i++) {
 
-//     // Append title
-//     chartGroupAAG.append("text")
-//         .attr("transform", `translate(${width / 2}, -15)`)
-//         .attr("text-anchor", "middle")
-//         .attr("font-size", "30px")
-//         .attr("fill", "black")
-//         .attr("stroke", "black")
-//         .attr("stroke-width", "1.5px")
-//         .attr("font-family", "Lato")
-//         .classed("title-label", true)
-//         .text(`Average Number of ${metricLabel} per Candidate`);
+        var candidateName = candidatesUniqueNames[i];
 
-//     // Append x axis label
-//     chartGroupAAG.append("text")
-//         .attr("transform", `translate(${width / 2}, ${height + 130})`)
-//         .attr("text-anchor", "middle")
-//         .attr("font-size", "18px")
-//         .attr("fill", "black")
-//         .attr("stroke", "black")
-//         .attr("stroke-width", "1px")
-//         .attr("font-family", "Roboto")
-//         .text("Candidate");
+        var candidateData = data.filter(d => d["user_name"] == candidateName);
 
-//     // Append y axis label
-//     chartGroupAAG.append("text")
-//         .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
-//         .attr("y", "-50")
-//         .attr("text-anchor", "middle")
-//         .attr("font-size", "18px")
-//         .attr("fill", d3.rgb(150,150,150))
-//         .attr("stroke", "black")
-//         .attr("stroke-width", "1px")
-//         .attr("font-family", "Roboto")
-//         .classed("y-axis-label", true)
-//         .text(`Average Number of ${metricLabel}`)
-// }
+        var candidateObject = {
+            userName: candidateName,
+            candidateData: candidateData
+        };
 
-// }
+        lineList.push(candidateObject);
+    }
+
+    console.log(lineList);
+
+    return(lineList);
+}
+
+function graphMA(data) {
+
+    // transform data into applicable form
+    // var initMA = JSON.parse(data);
+
+    var initMA = data;
+
+    console.log(initMA);
+
+    // create time parser
+    var parseTime = d3.timeParse("%Y-%m-%d");
+
+    // init metric == retweets
+
+    var initMetric = "retweet_moving_average"
+
+    initMA.forEach(function(data) {
+        data["moving_average_date"] = parseTime(data["moving_average_date"]);
+        data[initMetric] = +data[initMetric];
+        data["favorite_moving_average"] = +data["favorite_moving_average"];
+    });
+
+
+    // create scalar for time x-axis
+    var xTimeScale = d3.scaleTime()
+        .domain(d3.extent(initMA, d => d["moving_average_date"]))
+        .range([0, width]);
+    // create scalar for y-axis
+    var yLinearScale = d3.scaleLinear()
+        .domain(d3.extent(initMA, d => d[initMetric]))
+        .range([height, 0]);
+
+    lineGenerator = d3.line()
+        .x(d => xTimeScale(d["moving_average_date"]))
+        .y(d => yLinearScale(d[initMetric]))
+
+    var bottomAxis = d3.axisBottom(xTimeScale)
+        .tickFormat(d3.timeFormat("%m-%d-%Y"))
+    var leftAxis = d3.axisLeft(yLinearScale);
+
+    chartGroupMA.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .call(bottomAxis)
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
+
+
+    chartGroupMA.append("g").call(leftAxis);
+
+
+    var chartLines = chartGroupMA.selectAll('.line')
+        .data(candidateGroup(initMA))
+        .enter()
+        .append("path")
+        .attr("d", function(d) {
+            return lineGenerator(d.candidateData)
+        })
+        .classed("line", true)
+        .style("stroke", (d, i) => colorBands(i))
+        .style("stroke-width", "2px")
+
+
+    // // retrieve keys for candidate names
+    // var bands = initData.map(d => d['user_name']);
+    // // retrieve average retweet data for candidates
+    // var retweetAverages = initData.map(d => d['retweet_average']);
+
+    // // create scalar for retweet data
+    // var yScaleBands = d3.scaleLinear()
+    //     .domain([0, d3.max(retweetAverages)])
+    //     .range([height, 0])
+    // // create scalar for candidate classifier
+    // var xScaleBands = d3.scaleBand()
+    //     .domain(bands)
+    //     .range([0, width])
+    //     .padding(0);
+    // // create axis
+    // var xBandsAxis = d3.axisBottom(xScaleBands);
+    // var yBandsAxis = d3.axisLeft(yScaleBands);
+    // // append y axis
+    // chartGroupAAG.append("g")
+    //     .classed("y-band-axis", true)
+    //     .call(yBandsAxis);
+    // // append x axis and transform text for readability
+    // chartGroupAAG.append("g")
+    //     .attr("transform", `translate(0, ${height})`)
+    //     .classed("x-band-axis", true)
+    //     .call(xBandsAxis)
+    //     .selectAll("text")
+    //         .attr("y", 0)
+    //         .attr("x", 9)
+    //         .attr("dy", ".35em")
+    //         .attr("transform", "rotate(90)")
+    //         .style("text-anchor", "start");
+
+    // // Append bars
+    // var rectGroupAAG = chartGroupAAG.selectAll("rect")
+    //     .data(initData)
+    //     .enter()
+    //     .append("rect")
+    //     .attr("x", (d, i) => xScaleBands(bands[i]))
+    //     .attr("y", d => yScaleBands(d['retweet_average']))
+    //     .attr("width", xScaleBands.bandwidth())
+    //     .attr("height", d => height - yScaleBands(d['retweet_average']))
+    //     .classed("bandsData", true)
+    //     .style("stroke", "black")
+    //     .style("fill", (d, i) => colorBands(i))
+
+    // // Append title
+    // chartGroupAAG.append("text")
+    //     .attr("transform", `translate(${width / 2}, -15)`)
+    //     .attr("text-anchor", "middle")
+    //     .attr("font-size", "30px")
+    //     .attr("fill", "black")
+    //     .attr("stroke", "black")
+    //     .attr("stroke-width", "1.5px")
+    //     .attr("font-family", "Lato")
+    //     .classed("title-label", true)
+    //     .text(`Average Number of ${metricLabel} per Candidate`);
+
+    // // Append x axis label
+    // chartGroupAAG.append("text")
+    //     .attr("transform", `translate(${width / 2}, ${height + 130})`)
+    //     .attr("text-anchor", "middle")
+    //     .attr("font-size", "18px")
+    //     .attr("fill", "black")
+    //     .attr("stroke", "black")
+    //     .attr("stroke-width", "1px")
+    //     .attr("font-family", "Roboto")
+    //     .text("Candidate");
+
+    // // Append y axis label
+    // chartGroupAAG.append("text")
+    //     .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
+    //     .attr("y", "-50")
+    //     .attr("text-anchor", "middle")
+    //     .attr("font-size", "18px")
+    //     .attr("fill", d3.rgb(150,150,150))
+    //     .attr("stroke", "black")
+    //     .attr("stroke-width", "1px")
+    //     .attr("font-family", "Roboto")
+    //     .classed("y-axis-label", true)
+    //     .text(`Average Number of ${metricLabel}`)
+}
+

@@ -73,3 +73,8 @@ font-weight: 400;
 }
 
 /* Graph CSS */
+
+.line {
+    fill: none;
+    stroke-width: 2px;
+  }
