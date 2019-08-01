@@ -78,3 +78,33 @@ font-weight: 400;
     fill: none;
     stroke-width: 2px;
   }
+
+.aag-tooltip {
+    position: absolute;
+    width: 240px;
+    height: 60px;
+    padding: 2px;
+    padding-top: 8px;
+    line-height: 1;
+    font: 12px sans-serif;
+    color: white;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.8);
+    border: 0;
+    border-radius: 10px;
+}
+
+.ma-tooltip {
+    position: absolute;
+    width: 240px;
+    height: 60px;
+    padding: 2px;
+    padding-top: 8px;
+    line-height: 1;
+    font: 12px sans-serif;
+    color: white;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.8);
+    border: 0;
+    border-radius: 10px;
+}

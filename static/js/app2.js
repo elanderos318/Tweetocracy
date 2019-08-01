@@ -33,6 +33,7 @@ datePicker = d3.select(".datepicker");
 //     console.log(data)
 // })
 
+//////// All Charts will use the below sizes ////////////////////
 // Set SVG Chart Formatting
 var svgHeight = 700;
 var svgWidth = 1100;
@@ -47,6 +48,7 @@ var margin = {
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
+///////// Retrieve initial data for displaying graphs on loading page ///////////////////
 // request tweet data from server API endpoint
 
 d3.json("/init_data").then(function(data) {
@@ -62,6 +64,8 @@ d3.json("/moving_average_init").then(function(data) {
     console.log(e);
 })
 
+
+/////////////// Select relevant filter data for event listeners ////////////////////
 // Select "At a Glance" Checkboxes
 var bidenBox = d3.select("#joe-biden-checkbox");
 var bookerBox = d3.select("#cory-booker-checkbox");
@@ -110,7 +114,7 @@ var selectionSubmit = d3.select(".selection-submit");
 // Create event listener for submit button
 selectionSubmit.on("click", submitClick);
 
-// Create Label for variable metric label display
+// Create Label for variable metric label display on initial laod
 var metricLabel = "Retweets"
 
 // Create Button Click function
@@ -243,7 +247,7 @@ function submitClick() {
 
     // Create time formatter
     var formatTime = d3.timeFormat("%b %d, %Y");
-
+    //// Default Dates will be set to the current date to a month ago
     var currentDate = new Date();
     var monthAgo = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()); 
 
@@ -253,9 +257,8 @@ function submitClick() {
     if (!dateTo) {
         dateTo = formatTime(currentDate);
         }
-    console.log(dateFrom);
-    console.log(dateTo);
-    console.log(`Type: ${typeof dateTo}`)
+    // console.log(dateFrom);
+    // console.log(dateTo);
 
     ////////////////////////////////////////////
 
@@ -266,6 +269,7 @@ function submitClick() {
 // Function for filtering data based on filter selections
 function filteredCandidatesData(candidatesList, metricVariable, aggregationVariable, dateFrom, dateTo) {
 
+    ///// Send a POST request to the backend to filter data for our "At a Glance" bar chart
     d3.json("/filter", {
         method: "POST",
         body: JSON.stringify({
@@ -277,9 +281,12 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
             "Content-type": "application/json; charset=UTF-8"
           }
     }).then(json => {
-        console.log(json)
-        console.log(typeof json)
+        // console.log(json)
+        // console.log(typeof json)
 
+        var aagData = json;
+
+        ////// set our x and y variables
         var bands = json.map(d => d["user_name"]);
         var score = json.map(d => d[metricVariable]);
 
@@ -288,20 +295,21 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
         // Select Y Axis Label
         var yAxisLabel = d3.select(".y-axis-label");
 
-        // Generate new xaxis
+        // Generate new xaxis scalar, select current x-axis, and render/transition to new axis
         xScaleBands = xBands(bands);
         xBandsAxis = d3.select(".x-band-axis");
         renderXBandsAxis(xScaleBands, xBandsAxis);
         
-        // Generate new yaxis
+        // Generate new yaxis scalar, select current y-axis, and render/transition to new axis
         yScaleBands = yBands(score);
         yBandsAxis = d3.select(".y-band-axis");
         renderYBandsAxis(yScaleBands, yBandsAxis);
 
-        renderRect(bands, xScaleBands, score, yScaleBands, titleLabel, yAxisLabel)
+        // Generate new bars
+        renderRect(bands, xScaleBands, aagData, yScaleBands, titleLabel, yAxisLabel, metricVariable)
     })
 
-
+    ///// Send a POST request to the backend to filter data for our "Moving Average" line chart
     d3.json("/moving_average_filter", {
         method: "POST",
         body: JSON.stringify({
@@ -313,8 +321,9 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
             "Content-type": "application/json; charset=UTF-8"
           }
     }).then(json => {
-        console.log(json)
-        console.log(typeof json)
+
+        // console.log(json)
+        // console.log(typeof json)
 
         var newMA = json;
 
@@ -338,36 +347,44 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
         });
 
 
-
-
+        // Select current y axis. Need to update the metric displayed if changed
         var linesYLabel = d3.select(".ma-y-axis-label");
 
         // Generate new xaxis
-        xTimeScale = xMovingLineAxis(newMA, lineMetric);
+        xTimeScale = xMovingLineScalar(newMA, lineMetric);
         xTimeAxis = d3.select(".ma-x-axis");
         renderXLineAxis(xTimeScale, xTimeAxis);
 
         // Generate new yaxis
-        yLinearScale = yMovingLineAxis(newMA, lineMetric);
+        yLinearScale = yMovingLineScalar(newMA, lineMetric);
         yLinearAxis = d3.select(".ma-y-axis");
         renderYLineAxis(yLinearScale, yLinearAxis);
 
-
+        // Genereate new lines
         renderLines(newMA, xTimeScale, yLinearScale, lineMetric, linesYLabel, metricLabel);
 
         
     })
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////    Section for updating Moving Average line chart /////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////// Render new Lines /////////////////////////////////////////////
+
 function renderLines(newMA, xTimeScale, yLinearScale, lineMetric, linesYLabel, metricLabel) {
 
+    // Build a "line generator" which will build line data for each candidate info
     someGenerator = d3.line()
         .x(d => xTimeScale(d["moving_average_date"]))
         .y(d => yLinearScale(d[lineMetric]))
-
+    ////// Select current line group, and pass in filtered data from "cnadidateGroup" function
     var linesGroup = chartGroupMA.selectAll(".line")
         .data(candidateGroup(newMA))
-
+        /// Enter any new path, and merge/update existing path data
+        // "someGenerator" will set x and y values for lines
         linesGroup.enter()
         .append("path")
         .merge(linesGroup)
@@ -377,40 +394,28 @@ function renderLines(newMA, xTimeScale, yLinearScale, lineMetric, linesYLabel, m
         .classed("line", true)
         .style("stroke", (d, i) => colorBands(i))
         .style("stroke-width", "2px")
-
+        // Remove any left over data
         linesGroup.exit().remove();
-
+    maToolTip(linesGroup, metricLabel, lineMetric);
+        // Transition y-label if another metric was selected
         linesYLabel.transition()
             .duration(1000)
             .text(`Moving Average (${metricLabel})`)
 
     return linesGroup;
-
-
-    // var chartLines = chartGroupMA.selectAll('.line')
-    // .data(candidateGroup(initMA))
-    // .enter()
-    // .append("path")
-    // .attr("d", function(d) {
-    //     return lineGenerator(d.candidateData)
-    // })
-    // .classed("line", true)
-    // .style("stroke", (d, i) => colorBands(i))
-    // .style("stroke-width", "2px")
-
 }
 
-function xMovingLineAxis(newMA) {
+////// Update X Axis Scalar
+
+function xMovingLineScalar(newMA) {
     // create scale 
     var xTimeScale = d3.scaleTime()
         .domain(d3.extent(newMA, d => d["moving_average_date"]))
         .range([0, width]);
-
-    // console.log(`X Axis Scalar Output : ${xTimeScale}`)
-
     return xTimeScale;
 }
 
+/////// Render new X Axis with updated scalar
 function renderXLineAxis(xTimeScale, xTimeAxis) {
     var bottomAxis = d3.axisBottom(xTimeScale)
         .tickFormat(d3.timeFormat("%m-%d-%Y"));
@@ -428,7 +433,8 @@ function renderXLineAxis(xTimeScale, xTimeAxis) {
     return xTimeAxis;
 }
 
-function yMovingLineAxis(data, lineMetric) {
+///// Update Y Axis Scalar
+function yMovingLineScalar(data, lineMetric) {
     // create scale
     var yLinearScale = d3.scaleLinear()
         .domain(d3.extent(data, d => d[lineMetric]))
@@ -437,6 +443,7 @@ function yMovingLineAxis(data, lineMetric) {
     return yLinearScale;
 }
 
+//// Render new Y Axis with updated scalar
 function renderYLineAxis(yLinearScale, yLinearAxis) {
     var leftAxis = d3.axisLeft(yLinearScale);
 
@@ -447,29 +454,61 @@ function renderYLineAxis(yLinearScale, yLinearAxis) {
     return yLinearAxis;
 }
 
+function maToolTip(chartLines, metricLabel, lineMetric) {
+
+    var maToolTip = d3.tip()
+        .attr("class", "ma-tooltip")
+        .offset([80, -60])
+        .html(function(d) {
+            return (`${d.userName}`)
+        })
+        // .html(function(d) {
+        //     return(`${d.userName}<br>${metricLabel} ${d.candidateData}`);
+        // });
+
+    chartLines.call(maToolTip);
+
+    chartLines.on("mouseover", maToolTip.show)
+        .on("mouseout", maToolTip.hide);
+
+    return chartLines;
+}
+
+////////////// Section End
+//////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////  Section for Updating "At A Glance" Bar Chart /////////////////
+///////////////////////////////////////////////////////////////////////////////////////
 
 
-function renderRect(bands, xScaleBands, score, yScaleBands, titleLabel, yAxisLabel) {
+
+////// Function for rendering new bars
+function renderRect(bands, xScaleBands, aagData, yScaleBands, titleLabel, yAxisLabel, metricVariable) {
+    /// Select current bars and pass in filtered data
     var rectGroup = chartGroupAAG.selectAll("rect")
-        .data(score)
-
+        .data(aagData)
+    /// Enter any new data, merge/update existing data
         rectGroup.enter()
         .append("rect")
         .merge(rectGroup)
         .style("fill", (d, i) => colorBands(i))
         .style("stroke", "black")
         .attr("x", (d, i) => xScaleBands(bands[i]))
-        .attr("y", d => yScaleBands(d))
+        .attr("y", d => yScaleBands(d[metricVariable]))
         .attr("width",xScaleBands.bandwidth())
-        .attr("height", d => height - yScaleBands(d))
-
-
+        .attr("height", d => height - yScaleBands(d[metricVariable]))
+    //// Remove any left over data
         rectGroup.exit().remove();
 
+    //// Update Tool Tips
+    aagToolTip(rectGroup, metricLabel, metricVariable);
+    
+    //// Update Title Label Display if metric changed
         titleLabel.transition()
             .duration(1000)
             .text(`Average Number of ${metricLabel} per Candidate`);
-
+    //// Update y label display if metric changed
         yAxisLabel.transition()
             .duration(1000)
             .text(`Average Number of ${metricLabel}`);
@@ -525,6 +564,29 @@ function renderXBandsAxis(xScaleBands, xBandsAxis) {
     return xBandsAxis;
 }
 
+/// Function for creating Tool Tips
+function aagToolTip(rectGroupAAG, metricLabel, metricVariable) {
+    var rectToolTip = d3.tip()
+        .attr("class", "aag-tooltip")
+        .offset([80, -60])
+        .html(function(d) {
+            return(`${d['user_name']}<br>Avg Number of ${metricLabel}: ${d[metricVariable]}`);
+        });
+
+    rectGroupAAG.call(rectToolTip);
+
+    rectGroupAAG.on("mouseover", rectToolTip.show)
+        .on("mouseout", rectToolTip.hide);
+
+    return rectGroupAAG;
+}       
+
+//////////// Section End
+//////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////     Create Initial "At a Glance" Graph     ///////////////
+/////////////////////////////////////////////////////////////////////////////
 
 // Create an SVG wrapper, append an SVG group that will hold our chart,
 // and shift the latter by left and top margins.
@@ -541,10 +603,6 @@ var chartGroupAAG = svgAAG.append("g")
 // Create color variable
 var colorBands = d3.scaleOrdinal(d3.schemeCategory20);
 
-/////////////////////////////////////////////////////////////////////////////
-/////////////////     Create Initial "At a Glance" Graph     ///////////////
-/////////////////////////////////////////////////////////////////////////////
-
 // Function to create initial AAG graph
 function graphAAG(data) {
     // transform data into applicable form
@@ -554,6 +612,9 @@ function graphAAG(data) {
     var bands = initData.map(d => d['user_name']);
     // retrieve average retweet data for candidates
     var retweetAverages = initData.map(d => d['retweet_average']);
+
+    // Create initial metricVariable
+    var initMetricVariable = "retweet_average";
 
     // create scalar for retweet data
     var yScaleBands = d3.scaleLinear()
@@ -595,6 +656,8 @@ function graphAAG(data) {
         .classed("bandsData", true)
         .style("stroke", "black")
         .style("fill", (d, i) => colorBands(i))
+
+    rectGroupAAG = aagToolTip(rectGroupAAG, metricLabel, initMetricVariable);
 
     // Append title
     chartGroupAAG.append("text")
@@ -677,6 +740,7 @@ function candidateGroup(data) {
     return(lineList);
 }
 
+////////////////// Create Initial Moving Average Graph
 function graphMA(data) {
 
     var initMA = data;
@@ -740,6 +804,8 @@ function graphMA(data) {
         .classed("line", true)
         .style("stroke", (d, i) => colorBands(i))
         .style("stroke-width", "2px")
+
+    maToolTip(chartLines, metricLabel, initMetric);
     
     // Append Title
     chartGroupMA.append("text")
