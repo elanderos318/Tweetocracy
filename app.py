@@ -35,8 +35,9 @@ engine = create_engine('sqlite:///db/twitter_db.sqlite', echo = False)
 Base = automap_base()
 # Use the Base class to reflect the database tables
 Base.prepare(engine, reflect=True)
-# Assign the tweets class to a variable called 'Tweets'
+# Assign the table classes to variables
 Tweets = Base.classes.tweet_data
+Update = Base.classes.database_update
 
 
 ######
@@ -471,6 +472,18 @@ def foo():
         candidate_name = candidates_list[x]['name']
         candidate_id = candidates_list[x]["twitter_user_id"]
 
+        # Update database with update records
+        time_now = dt.time.now()
+        date_now = dt.date.now()
+        datetime_now = dt.datetime.now()
+        update_type = "one_thousand_requests"
+        update_candidate_id = candidate_id
+
+        session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+            update_type = update_type, candidate_id_str = update_candidate_id))
+        
+        session.commit()
+
 
         for y in range(0, 10):
             
@@ -541,6 +554,185 @@ def foo():
 
                 #Store 'max id variable
                 if y == 0:
+                    max_id = tweet_id - 1
+
+                if tweet_id < max_id:
+                    max_id = tweet_id -1
+
+                # Query the sql table and look for tweet_id_str
+
+                tweet_query = session.query(Tweets)
+
+                if tweet_query.filter_by(tweet_id_str = tweet_id_str).count() > 0:
+                    # Select existing tweet from table
+                    existing_tweet = tweet_query.filter_by(tweet_id_str = tweet_id_str)
+                    #Update columns
+                    existing_tweet.created_at = created_at
+                    existing_tweet.tweet_id = tweet_id
+                    existing_tweet.tweet_id_str = tweet_id_str
+                    existing_tweet.full_text = full_text
+                    existing_tweet.in_reply_to_status_id = in_reply_to_status_id
+                    existing_tweet.in_reply_to_status_id_str = in_reply_to_status_id_str
+                    existing_tweet.in_reply_to_user_id = in_reply_to_user_id
+                    existing_tweet.in_reply_to_user_id_str = in_reply_to_user_id_str
+                    existing_tweet.user_id = user_id
+                    existing_tweet.user_id_str = user_id_str
+                    existing_tweet.user_name = user_name
+                    existing_tweet.user_screen_name = user_screen_name
+                    existing_tweet.retweet_count = retweet_count
+                    existing_tweet.favorite_count = favorite_count
+
+                    existing_tweet.created_at_time = created_at_time
+                    existing_tweet.created_at_date = created_at_date
+                    existing_tweet.created_at_datetime = created_at_datetime
+
+                    #stage update
+                    session.dirty
+                    #commit update
+                    session.commit()
+
+                    print("existing tweet")
+                else:
+                    print("adding tweet to db")
+                    session.add(Tweets(created_at = created_at, created_at_time = created_at_time,
+                        created_at_date = created_at_date,
+                        created_at_datetime = created_at_datetime, 
+                        tweet_id = tweet_id, tweet_id_str = tweet_id_str,
+                        full_text = full_text, in_reply_to_status_id = in_reply_to_status_id,
+                        in_reply_to_status_id_str = in_reply_to_status_id_str,
+                        in_reply_to_user_id = in_reply_to_user_id, in_reply_to_user_id_str = in_reply_to_user_id_str,
+                        user_id = user_id, user_id_str = user_id_str, user_name = user_name, user_screen_name = user_screen_name,
+                        retweet_count = retweet_count, favorite_count = favorite_count))
+
+                    session.commit()
+
+                ################################################
+
+                user_tweet_count = user_tweet_count + 1
+                user_retweet_total = user_retweet_total + retweet_count
+                user_favorite_total = user_favorite_total + favorite_count
+            try:
+                retweet_average = user_retweet_total / user_tweet_count
+                favorite_average = user_favorite_total / user_tweet_count
+            except ZeroDivisionError:
+                pass
+
+        print(f'Retweet Average for User {user_name} is {retweet_average}')
+
+        response_list.append({
+            "user": user_name,
+            "retweet_average": retweet_average,
+            "favorite_average": favorite_average,
+            "total_tweets_retrieved": user_tweet_count,
+            "total_retweets_counted": user_retweet_total
+        })
+
+    session.close()
+
+    response_json = json.dumps(response_list)
+
+
+    return response_json
+
+@app.route("/foo_full")
+def foo_full():
+
+    session = Session(engine)
+
+    ### Fetch Timeline Data
+
+    response_list = []
+
+    # for x in range(len(candidates_list)):
+
+    for x in range(14, len(candidates_list)):
+
+        candidate_name = candidates_list[x]['name']
+        candidate_id = candidates_list[x]["twitter_user_id"]
+        candidate_announcement = candidates_list[x]["announcement_date"]
+
+        candidate_datetime = dt.datetime.strptime(candidate_announcement, "%B %d, %Y")
+        candidate_date = candidate_datetime.date() - dt.timedelta(days = 30)
+
+        n = 0
+
+        announcement_date = False
+
+        while announcement_date == False:            
+
+            if n == 0:
+
+                user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&count=100', params = extended_payload, auth = auth)
+
+            else:
+
+                user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&max_id={max_id}&count=100', params = extended_payload, auth = auth)
+
+            n = n + 1
+            
+            try:
+                user_json = user_get.json()
+                print(json.dumps(user_json[0], indent = 4))
+            except IndexError:
+                break
+            user_tweet_count = 0
+            user_retweet_total = 0
+            user_favorite_total = 0
+
+            print(f'Retrieving Data for {candidate_name}: Iteration {n}')
+
+
+            for tweet in user_json:
+                
+                print(f'{candidate_name}')
+                print(f'Tweet Count: {user_tweet_count}')
+                print(f'Total Retweet Count: {user_retweet_total}')
+
+                # We do not count retweets as user tweets. If retweeted_stats is true, we will continue to the next iteration
+                try:
+                    tweet["retweeted_status"]
+                    continue
+                except KeyError:
+                    pass
+
+                ####### Program code for detecting replies/self-replies
+
+                # reply = tweet['in_reply_to_user_id_str']
+
+                # if reply:
+                #     if reply == tweet['user']['id_str']:
+                #         pass
+                #     else:
+                #         passed_tweets = passed_tweets + 1
+                #         continue
+                
+
+
+                # Store relevant information in variables
+                created_at = tweet["created_at"]
+                tweet_id = tweet["id"]
+                tweet_id_str = tweet["id_str"]
+                full_text = tweet["full_text"]
+                in_reply_to_status_id = tweet["in_reply_to_status_id"]
+                in_reply_to_status_id_str = tweet["in_reply_to_status_id_str"]
+                in_reply_to_user_id = tweet["in_reply_to_user_id"]
+                in_reply_to_user_id_str = tweet["in_reply_to_user_id_str"]
+                user_id = tweet["user"]["id"]
+                user_id_str = tweet["user"]["id_str"]
+                user_name = tweet["user"]["name"]
+                user_screen_name = tweet["user"]["screen_name"]
+                retweet_count = tweet["retweet_count"]
+                favorite_count = tweet["favorite_count"]
+
+                created_at_time = convert_time(created_at)
+                created_at_date = convert_date(created_at)
+                created_at_datetime = convert_datetime(created_at)
+
+                if created_at_date <= candidate_date:
+                    announcement_date = True
+
+                #Store 'max id variable
+                if n == 1:
                     max_id = tweet_id - 1
 
                 if tweet_id < max_id:
