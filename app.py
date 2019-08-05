@@ -290,8 +290,134 @@ def data():
 
     return jsonify(response_json)
 
-@app.route("/moving_average_update_full")
+@app.route("/moving_average_update")
 def moving_average_update():
+    session = Session(engine)
+
+    #timedelta object (10 days) for moving average
+    days_back = dt.timedelta(days = 10)
+
+    for candidate in candidates_list:
+        # Fetch user id
+        candidate_name_parent = candidate["name"]
+        candidate_user_id = candidate["twitter_user_id"]
+        print(candidate["name"])
+
+        # Fetch most recent date for candidate and convert to date object
+        most_recent_date = session.query(func.max(Tweets.created_at_date)).filter(Tweets.user_id_str == candidate_user_id).first()
+        most_recent_date_object = most_recent_date[0]
+        #Fetch date equal to 10 days before the last time table was updated
+        # 21. The half-life of a tweet is 24 minutes
+        # In other words, a tweet gets half its interactions in the first half hour, and then starts a long, slow decline into the fog of time
+        # "https://blog.hootsuite.com/twitter-statistics/"
+        most_recent_update = session.query(func.max(Moving_Averages.date)).\
+            filter(Moving_Averages.candidate_id_str == candidate_user_id).first()
+        ten_days_before = most_recent_update[0] - dt.timedelta(days = 10)
+        #Create query which encompasses all dates for candidate
+        update_query_all = session.query(Tweets.user_name,
+            func.avg(Tweets.retweet_count),
+            func.avg(Tweets.favorite_count)).\
+            filter(Tweets.user_id == candidate_user_id).\
+            filter(Tweets.created_at_date >= (ten_days_before  - days_back)).\
+            filter(Tweets.created_at_date <= most_recent_date_object)
+        # Find days between most recent and oldest plus one day
+        days_diff = (most_recent_date_object - ten_days_before + dt.timedelta(days = 1)).days
+
+        for days in range(0, days_diff):
+            print(candidate_name_parent)
+            # Select the current date in iteration
+            current_date = ten_days_before + dt.timedelta(days = days)
+            print(current_date)
+            # Further filter query to select ten days before the current selected query(csq) up until csq
+            current_date_query = update_query_all.\
+                filter(Tweets.created_at_date > (current_date - days_back)).\
+                filter(Tweets.created_at_date <= current_date).first()
+            # Check if query has no tweets, then update table with zero values if true
+            if (current_date_query[0] is None) and (current_date_query[1] is None):
+                # Check if "None" row was previously added
+                check_none_query = session.query(Moving_Averages).filter(Moving_Averages.date == current_date).\
+                    filter(Moving_Averages.candidate_id_str == candidate_user_id)
+
+                if check_none_query.count() > 0:
+                    print("No Data, Row already exists, no update")
+                    continue
+                else:
+                    session.add(Moving_Averages(candidate_name = candidate_name_parent,
+                        candidate_id_str = candidate_user_id,
+                        date = current_date,
+                        retweet_moving_average = 0,
+                        favorite_moving_average = 0))
+                    session.commit()
+
+                    # Update "Update" database with most recent records
+                    datetime_now = dt.datetime.utcnow()
+                    time_now = datetime_now.time()
+                    date_now = datetime_now.date()
+                    update_type = "moving_averages - from most recent tweets to 10 days before last update"
+
+                    session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                        update_type = update_type, candidate_id_str = candidate_user_id))
+                    session.commit()
+
+                    print("No Data, table updated")
+                    continue
+
+            candidate_name = current_date_query[0]
+            retweet_moving_average = current_date_query[1]
+            favorite_moving_average = current_date_query[2]
+
+            check_existing_query = session.query(Moving_Averages).filter(Moving_Averages.date == current_date).\
+                filter(Moving_Averages.candidate_id_str == candidate_user_id)
+
+            if check_existing_query.count() > 0:
+
+                check_existing_query.candidate_name = candidate_name
+                check_existing_query.retweet_moving_average = retweet_moving_average
+                check_existing_query.favorite_moving_average = favorite_moving_average
+
+                session.dirty
+                session.commit()
+
+                # Update "Update" database
+                datetime_now = dt.datetime.utcnow()
+                time_now = datetime_now.time()
+                date_now = datetime_now.date()
+                update_type = "moving_averages - from most recent tweets to 10 days before last update"
+
+                session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                    update_type = update_type, candidate_id_str = candidate_user_id))
+
+                session.commit()
+                print('existing_data')
+                print(current_date_query)
+
+            else:
+
+                session.add(Moving_Averages(candidate_name = candidate_name, candidate_id_str = candidate_user_id,
+                    date = current_date, retweet_moving_average = retweet_moving_average, favorite_moving_average = favorite_moving_average))
+                
+                session.commit()
+
+                # Update "Update" database
+                datetime_now = dt.datetime.utcnow()
+                time_now = datetime_now.time()
+                date_now = datetime_now.date()
+
+                update_type = "moving_averages - from most recent tweets to 10 days before last update"
+
+                session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                    update_type = update_type, candidate_id_str = candidate_user_id))
+
+                session.commit()
+                print('data updated')
+                print(current_date_query)
+
+    session.close()
+
+    return "Complete"
+
+@app.route("/moving_average_update_full")
+def moving_average_update_full():
 
     session = Session(engine)
     # Timedelta object (10 days) for moving average
@@ -302,18 +428,6 @@ def moving_average_update():
         candidate_name_parent = candidate["name"]
         candidate_user_id = candidate["twitter_user_id"]
         print(candidate["name"])
-
-
-        datetime_now = dt.datetime.utcnow()
-        time_now = datetime_now.time()
-        date_now = datetime_now.date()
-
-        update_type = "moving_averages - full"
-
-        session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
-            update_type = update_type, candidate_id_str = candidate_user_id))
-
-        session.commit()
 
         # Fetch most recent date for candidate and convert to date object
         most_recent_date = session.query(func.max(Tweets.created_at_date)).filter(Tweets.user_id_str == candidate_user_id).first()
@@ -332,28 +446,46 @@ def moving_average_update():
         # Find days between most recent and oldest plus one day
         days_diff = (most_recent_date_object - oldest_date_object + dt.timedelta(days = 1)).days
 
-
-
         for days in range(0, days_diff):
             print(candidate_name_parent)
-
+            # Select the current date in iteration
             current_date = oldest_date_object + dt.timedelta(days = days)
             print(current_date)
-
+            # Further filter query to select ten days before the current selected query(csq) up until csq
             current_date_query = update_query_all.\
                 filter(Tweets.created_at_date > (current_date - days_back)).\
                 filter(Tweets.created_at_date <= current_date).first()
-            print(current_date_query is None)
+            # Check if query has no tweets, then update table with zero values if true
             if (current_date_query[0] is None) and (current_date_query[1] is None):
-                session.add(Moving_Averages(candidate_name = candidate_name_parent,
-                    candidate_id_str = candidate_user_id,
-                    date = current_date,
-                    retweet_moving_average = 0,
-                    favorite_moving_average = 0))
-                session.commit()
+                # Check if "None" row was previously added
+                check_none_query = session.query(Moving_Averages).filter(Moving_Averages.date == current_date).\
+                    filter(Moving_Averages.candidate_id_str == candidate_user_id)
 
-                print("No Data, table updated")
-                continue
+                if check_none_query.count() > 0:
+                    print("No Data, Row already exists, no update")
+                    continue
+                else:
+                    session.add(Moving_Averages(candidate_name = candidate_name_parent,
+                        candidate_id_str = candidate_user_id,
+                        date = current_date,
+                        retweet_moving_average = 0,
+                        favorite_moving_average = 0))
+                    session.commit()
+
+                    # Update "Update" database
+                    datetime_now = dt.datetime.utcnow()
+                    time_now = datetime_now.time()
+                    date_now = datetime_now.date()
+
+                    update_type = "moving_averages - full"
+
+                    session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                        update_type = update_type, candidate_id_str = candidate_user_id))
+
+                    session.commit()
+
+                    print("No Data, table updated")
+                    continue
             
             candidate_name = current_date_query[0]
             retweet_moving_average = current_date_query[1]
@@ -370,6 +502,18 @@ def moving_average_update():
 
                 session.dirty
                 session.commit()
+
+                # Update "Update" database
+                datetime_now = dt.datetime.utcnow()
+                time_now = datetime_now.time()
+                date_now = datetime_now.date()
+
+                update_type = "moving_averages - full"
+
+                session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                    update_type = update_type, candidate_id_str = candidate_user_id))
+
+                session.commit()
                 print('existing_data')
                 print(current_date_query)
 
@@ -379,16 +523,28 @@ def moving_average_update():
                     date = current_date, retweet_moving_average = retweet_moving_average, favorite_moving_average = favorite_moving_average))
                 
                 session.commit()
+
+                # Update "Update" database
+                datetime_now = dt.datetime.utcnow()
+                time_now = datetime_now.time()
+                date_now = datetime_now.date()
+
+                update_type = "moving_averages - full"
+
+                session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                    update_type = update_type, candidate_id_str = candidate_user_id))
+
+                session.commit()
                 print('data updated')
                 print(current_date_query)
 
 
-    complete_data = session.query(Moving_Averages.candidate_name,
-        Moving_Averages.date, Moving_Averages.retweet_moving_average, Moving_Averages.favorite_moving_average).all()
+    # complete_data = session.query(Moving_Averages.candidate_name,
+    #     Moving_Averages.date, Moving_Averages.retweet_moving_average, Moving_Averages.favorite_moving_average).all()
 
     session.close()
 
-    return complete_data
+    return "Complete"
 
 
 @app.route("/moving_average_init")
@@ -617,30 +773,16 @@ def foo():
 
     response_list = []
 
-    for x in range(len(candidates_list)):
+    # for x in range(len(candidates_list)):
 
-    # for x in range(17, len(candidates_list)):
+    for x in range(17, len(candidates_list)):
 
         candidate_name = candidates_list[x]['name']
         candidate_id = candidates_list[x]["twitter_user_id"]
 
-        # Update database with update records
-        datetime_now = dt.datetime.now()
-        time_now = datetime_now.time()
-        date_now = datetime_now.date()
-
-        update_type = "tweet_data - one_thousand_requests"
-        update_candidate_id = candidate_id
-
-        session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
-            update_type = update_type, candidate_id_str = update_candidate_id))
-        
-        session.commit()
-
-
         for y in range(0, 10):
             
-
+            
             if y == 0:
 
                 user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&count=100', params = extended_payload, auth = auth)
@@ -650,7 +792,7 @@ def foo():
                 user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&max_id={max_id}&count=100', params = extended_payload, auth = auth)
 
             user_json = user_get.json()
-            print(json.dumps(user_json[0], indent = 4))
+            # print(json.dumps(user_json[0], indent = 4))
 
             user_tweet_count = 0
             user_retweet_total = 0
@@ -661,7 +803,7 @@ def foo():
 
             for tweet in user_json:
                 
-
+                print(candidate_name)
                 print(f'Tweet Count: {user_tweet_count}')
                 print(f'Total Retweet Count: {user_retweet_total}')
 
@@ -744,6 +886,20 @@ def foo():
                     #commit update
                     session.commit()
 
+                    
+                    # Update database with update records
+                    datetime_now = dt.datetime.now()
+                    time_now = datetime_now.time()
+                    date_now = datetime_now.date()
+
+                    update_type = "tweet_data - one_thousand_requests"
+                    update_candidate_id = candidate_id
+
+                    session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                        update_type = update_type, candidate_id_str = update_candidate_id))
+                    
+                    session.commit()
+
                     print("existing tweet")
                 else:
                     print("adding tweet to db")
@@ -757,6 +913,19 @@ def foo():
                         user_id = user_id, user_id_str = user_id_str, user_name = user_name, user_screen_name = user_screen_name,
                         retweet_count = retweet_count, favorite_count = favorite_count))
 
+                    session.commit()
+
+                    # Update database with update records
+                    datetime_now = dt.datetime.now()
+                    time_now = datetime_now.time()
+                    date_now = datetime_now.date()
+
+                    update_type = "tweet_data - one_thousand_requests"
+                    update_candidate_id = candidate_id
+
+                    session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                        update_type = update_type, candidate_id_str = update_candidate_id))
+                    
                     session.commit()
 
                 ################################################
@@ -811,18 +980,7 @@ def foo_full():
 
         announcement_date = False
 
-        # Update database with update records
-        datetime_now = dt.datetime.now()
-        time_now = datetime_now.time()
-        date_now = datetime_now.date()
 
-        update_type = "tweet_data - full"
-        update_candidate_id = candidate_id
-
-        session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
-            update_type = update_type, candidate_id_str = update_candidate_id))
-        
-        session.commit()
 
         while announcement_date == False:            
 
@@ -936,6 +1094,19 @@ def foo_full():
                     #commit update
                     session.commit()
 
+                    # Update database with update records
+                    datetime_now = dt.datetime.now()
+                    time_now = datetime_now.time()
+                    date_now = datetime_now.date()
+
+                    update_type = "tweet_data - full"
+                    update_candidate_id = candidate_id
+
+                    session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                        update_type = update_type, candidate_id_str = update_candidate_id))
+                    
+                    session.commit()
+
                     print("existing tweet")
                 else:
                     print("adding tweet to db")
@@ -949,6 +1120,19 @@ def foo_full():
                         user_id = user_id, user_id_str = user_id_str, user_name = user_name, user_screen_name = user_screen_name,
                         retweet_count = retweet_count, favorite_count = favorite_count))
 
+                    session.commit()
+
+                    # Update database with update records
+                    datetime_now = dt.datetime.now()
+                    time_now = datetime_now.time()
+                    date_now = datetime_now.date()
+
+                    update_type = "tweet_data - full"
+                    update_candidate_id = candidate_id
+
+                    session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                        update_type = update_type, candidate_id_str = update_candidate_id))
+                    
                     session.commit()
 
                 ################################################
