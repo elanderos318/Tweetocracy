@@ -270,7 +270,7 @@ function submitClick() {
 function filteredCandidatesData(candidatesList, metricVariable, aggregationVariable, dateFrom, dateTo) {
 
     ///// Send a POST request to the backend to filter data for our "At a Glance" bar chart
-    d3.json("/filter", {
+    d3.json("/aag_filter", {
         method: "POST",
         body: JSON.stringify({
             candidatesList: candidatesList,
@@ -281,11 +281,8 @@ function filteredCandidatesData(candidatesList, metricVariable, aggregationVaria
             "Content-type": "application/json; charset=UTF-8"
           }
     }).then(json => {
-        // console.log(json)
-        // console.log(typeof json)
 
         var aagData = json;
-
         ////// set our x and y variables
         var bands = json.map(d => d["user_name"]);
         var score = json.map(d => d[metricVariable]);
@@ -496,7 +493,7 @@ function renderRect(bands, xScaleBands, aagData, yScaleBands, titleLabel, yAxisL
         .style("stroke", "black")
         .attr("x", (d, i) => xScaleBands(bands[i]))
         .attr("y", d => yScaleBands(d[metricVariable]))
-        .attr("width",xScaleBands.bandwidth())
+        .attr("width", xScaleBands.bandwidth())
         .attr("height", d => height - yScaleBands(d[metricVariable]))
     //// Remove any left over data
         rectGroup.exit().remove();
@@ -505,13 +502,13 @@ function renderRect(bands, xScaleBands, aagData, yScaleBands, titleLabel, yAxisL
     aagToolTip(rectGroup, metricLabel, metricVariable);
     
     //// Update Title Label Display if metric changed
-        titleLabel.transition()
-            .duration(1000)
-            .text(`Average Number of ${metricLabel} per Candidate`);
+    titleLabel.transition()
+        .duration(1000)
+        .text(`Average Number of ${metricLabel} per Candidate`);
     //// Update y label display if metric changed
-        yAxisLabel.transition()
-            .duration(1000)
-            .text(`Average Number of ${metricLabel}`);
+    yAxisLabel.transition()
+        .duration(1000)
+        .text(`Average Number of ${metricLabel}`);
 
     return rectGroup;
 }
@@ -937,13 +934,14 @@ var steyerTime = d3.select("#time-tom-steyer-radio");
 var meanRadioTime = d3.select("#time-mean-radio");
 var medianRadioTime = d3.select("#time-median-radio");
 
-// Select "Retweets or Favorites Radio Buttons"
-var retweetRadioTime = d3.select("#time-hourly-radio");
-var favoriteRadioTime = d3.select("#time-daily-radio");
+// Select "Retweets,Favorites, or Count" Radio Buttons"
+var retweetRadioTime = d3.select("#time-retweet-radio");
+var favoriteRadioTime = d3.select("#time-favorite-radio");
+var countRadioTime = d3.select("#time-count-radio");
 
 // Select "Hourly or Daily" Buttons
-var hourlyRadioTime = d3.select("#time-retweet-radio");
-var dailyRadioTime = d3.select("#time-favorite-radio");
+var hourlyRadioTime = d3.select("#time-hourly-radio");
+var dailyRadioTime = d3.select("#time-daily-radio");
 
 // Select "Date From" and "Date To" Inputs
 var dateFromSelectionTime = d3.select("#time-date-from");
@@ -959,100 +957,20 @@ selectionSubmitTime.on("click", submitTimeClick);
 var timeMetricLabel = "Retweets";
 // create variable for functional data type to use
 var metricTimeVar = "retweet_average";
+// create variable for 'Hour' or "Day" choice
+var timeChoice = "Hour";
 
 
+var chosenCandidate = "939091";
+const candidateButtons = d3.selectAll(".time-input-radio");
+candidateButtons.on("change", function(d) {
+    chosenCandidate = this.value;
+})
+
+// function will gather filter selections
 function submitTimeClick() {
-    // Create list to append all checked candidates
-    var candidatesList = [];
     // Prevent the page from refreshing
     d3.event.preventDefault();
-
-    ////////////////////////////////////////////////////
-    // Append list with names whose boxes are checked
-    if (bidenTime.property("checked")) {
-        candidatesList.push("939091");
-    }
-    if (bookerTime.property("checked")) {
-        candidatesList.push("15808765");
-    }
-    if (buttigiegTime.property("checked")) {
-        candidatesList.push("226222147");
-    }
-    if (castroTime.property("checked")) {
-        candidatesList.push("19682187");
-    }
-    if (delaneyTime.property("checked")) {
-        candidatesList.push("426028646");
-    }
-    if (gabbardTime.property("checked")) {
-        candidatesList.push("26637348");
-    }
-    if (gillibrandTime.property("checked")) {
-        candidatesList.push("72198806");
-    }
-    if (gravelTime.property("checked")) {
-        candidatesList.push("14709326");
-    }
-    if (harrisTime.property("checked")) {
-        candidatesList.push("30354991");
-    }
-    if (hickenlooperTime.property("checked")) {
-        candidatesList.push("117839957");
-    }
-    if (insleeTime.property("checked")) {
-        candidatesList.push("21789463");
-    }
-    if (klobucharTime.property("checked")) {
-        candidatesList.push("33537967");
-    }
-    if (messamTime.property("checked")) {
-        candidatesList.push("33954145");
-    }
-    if (moultonTime.property("checked")) {
-        candidatesList.push("248495200");
-    }
-    if (rourkeTime.property("checked")) {
-        candidatesList.push("342863309");
-    }
-    if (ryanTime.property("checked")) {
-        candidatesList.push("466532637");
-    }
-    if (sandersTime.property("checked")) {
-        candidatesList.push("216776631");
-    }
-    if (trumpTime.property("checked")) {
-        candidatesList.push("25073877");
-    }
-    if (warrenTime.property("checked")) {
-        candidatesList.push("357606935");
-    }
-    if (weldTime.property("checked")) {
-        candidatesList.push("734783792502575105");
-    }
-    if (williamsonTime.property("checked")) {
-        candidatesList.push("21522338");
-    }
-    if (yangTime.property("checked")) {
-        candidatesList.push("2228878592");
-    }
-    if (swalwellTime.property("checked")) {
-        candidatesList.push("942156122");
-    }
-    if (bennetTime.property("checked")) {
-        candidatesList.push("45645232");
-    }
-    if (bullockTime.property("checked")) {
-        candidatesList.push("111721601");
-    }
-    if (blasioTime.property("checked")) {
-        candidatesList.push("476193064");
-    }
-    if (sestakTime.property("checked")) {
-        candidatesList.push("46764631");
-    }
-    if (steyerTime.property("checked")) {
-        candidatesList.push("949934436");
-    }
 
     /////////////////////////////////////////////
 
@@ -1073,11 +991,24 @@ function submitTimeClick() {
     if (retweetRadioTime.property("checked")) {
         metricTimeVar = "retweet_average";
         timeMetricLabel = "Retweets";
-    } else {
+    } else if (favoriteRadioTime.property("checked")) {
         metricTimeVar = "favorite_average";
         timeMetricLabel = "Favorites";
+    } else {
+        metricTimeVar = "count";
+        timeMetricLabel = "Count";
     }
     /////////////////////////////////////////////
+
+    // Check Hour/Day Selection
+
+    if (hourlyRadioTime.property("checked")) {
+        timeChoice = "Hour";
+    } else {
+        timeChoice = "Day";
+    }
+
+    ////////////////////////////////////////////////////////
 
     // Check Date Range Selected
 
@@ -1093,10 +1024,10 @@ function submitTimeClick() {
     var monthAgo = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()); 
 
     if (!dateFromTime) {
-        dateFrom = formatTime(monthAgo);
+        dateFromTime = formatTime(monthAgo);
     }
     if (!dateToTime) {
-        dateTo = formatTime(currentDate);
+        dateToTime = formatTime(currentDate);
         }
     // console.log(dateFrom);
     // console.log(dateTo);
@@ -1104,9 +1035,162 @@ function submitTimeClick() {
     ////////////////////////////////////////////
 
 
-    filteredTimeData(candidatesList, metricTimeVar, aggregationTimeVar, dateFromTime, dateToTime);
+    filteredTimeData(chosenCandidate, metricTimeVar, aggregationTimeVar, dateFromTime, dateToTime, timeChoice);
 }
 
+// Function for filtering based on filter selection
+function filteredTimeData(chosenCandidate, metricTimeVar, aggregationTimeVar, dateFromTime, dateToTime, timeChoice) {
+    //// Send a POST request to the backend to filter data for "Time" bar chart
+    console.log(chosenCandidate);
+    d3.json("/time_filter", {
+        method: "POST",
+        body: JSON.stringify({
+            chosenCandidate: chosenCandidate,
+            dateFrom: dateFromTime,
+            dateTo: dateToTime,
+            timeBasis: timeChoice
+        }),
+        headers: {
+            "Content-type": "application/json; charset-UTF-i"
+        }
+    }).then(json => {
+
+        var timeData = json;
+        /// set our x and y variables
+        var timeBands = json.map(d => d[timeChoice]);
+        var yVariable = json.map(d => d[metricTimeVar]);
+
+        // Select Labels
+        var timeTitle = d3.select(".time-title-label");
+        var xTimeLabel = d3.select(".x-time-label");
+        var yTimeLabel = d3.select(".y-time-label");
+
+        // Generate new xaxis sclar, select current x-axis, and render/transition to new axis
+        xScaleTimeBands = xTimeBands(timeBands);
+        xTimeBandsAxis = d3.select(".x-time-axis");
+        renderXTimeBandsAxis(xScaleTimeBands, xTimeBandsAxis);
+        // Generate new yaxis scalar, select current y-axis, and render/transition to new axis
+        yScaleTimeBands = yTimeBands(yVariable);
+        yTimeBandsAxis = d3.select(".y-time-axis");
+        renderYTimeBandsAxis(yScaleTimeBands, yTimeBandsAxis);
+
+        //Generate new Bars
+        renderTimeRect(timeBands, xScaleTimeBands, timeData, timeTitle, yScaleTimeBands, xTimeLabel, yTimeLabel, metricTimeVar);
+
+
+    })
+}
+
+// function for updating "Time" graph bars
+function renderTimeRect(timeBands, xScaleTimeBands, timeData, timeTitle, yScaleTimeBands, xTimeLabel, yTimeLabel, metricTimeVar) {
+    // Select current bars and pass in filtered data
+    var rectGroupTime = chartGroupTime.selectAll("rect")
+        .data(timeData)
+    // Enter any new data, merge/update existing data
+        rectGroupTime.enter()
+        .append("rect")
+        .merge(rectGroupTime)
+        .style("fill", (d, i) => colorBands(i))
+        .style("stroke", "black")
+        .attr("x", (d, i) => xScaleTimeBands(timeBands[i]))
+        .attr("y", d => yScaleTimeBands(d[metricTimeVar]))
+        .attr("width", xScaleTimeBands.bandwidth())
+        .attr("height", d => height - yScaleTimeBands(d[metricTimeVar]))
+    // Remove any left over data
+        rectGroupTime.exit().remove();
+    
+    // Update Tool Tips
+    timeToolTip(rectGroupTime, timeMetricLabel, metricTimeVar);
+
+    // Update Labels
+    xTimeLabel.transition()
+        .duration(1000)
+        .text(`${timeChoice}`)
+    
+    if (timeMetricLabel == "Count") {
+        timeTitle.transition()
+            .duration(1000)
+            .text(`Total Number of Tweets per ${timeChoice}: ${timeData[0]["user_name"]}`)
+        yTimeLabel.transition()
+            .duration(1000)
+            .text("Total Number of Tweets")
+    } else {
+        timeTitle.transition()
+            .duration(1000)
+            .text(`Average Number of ${timeMetricLabel} per ${timeChoice}: ${timeData[0]["user_name"]}`)
+        yTimeLabel.transition()
+            .duration(1000)
+            .text(`Average Number of ${timeMetricLabel}`)
+    }
+
+    return rectTimeGroup;
+}
+
+// funciton used for updating y axis scalar
+function yTimeBands(yVariable) {
+    var yScaleTimeBands = d3.scaleLinear()
+        .domain([0, d3.max(yVariable)])
+        .range([height, 0])
+
+    return yScaleTimeBands;
+}
+
+// function used for updating Y Axis 
+function renderYTimeBandsAxis(yScaleTimeBands, yTimeBandsAxis) {
+    var leftAxis = d3.axisLeft(yScaleTimeBands);
+
+    yTimeBandsAxis.transition()
+        .duration(1000)
+        .call(leftAxis);
+
+    return yTimeBandsAxis;
+}
+// function used for updating x-axis scalar
+function xTimeBands(timeBands) {
+    // create scale
+    var xScaleTimeBands = d3.scaleBand()
+        .domain(timeBands)
+        .range([0, width])
+
+    return xScaleTimeBands;
+}
+
+// function used for updateing X Axis
+function renderXTimeBandsAxis(xScaleTimeBands, xTimeBandsAxis) {
+    var bottomAxis = d3.axisBottom(xScaleTimeBands);
+
+    xTimeBandsAxis.transition()
+        .duration(1000)
+        .call(bottomAxis);
+    
+    return xTimeBandsAxis;
+}
+
+function timeToolTip(rectGroupTime, timeMetricLabel, metricTimeVar) {
+
+    if (timeMetricLabel == "Count") {
+    var rectToolTip = d3.tip()
+        .attr("class", "time-tooltip")
+        .offset([80, -60])
+        .html(function(d) {
+            return(`${d['user_name']}<br>Total Number of Tweets: ${d[metricTimeVar]}<br>${timeChoice}: ${d[timeChoice]}`)
+        });
+    } else {
+    var rectToolTip = d3.tip()
+        .attr("class", "time-tooltip")
+        .offset([80, -60])
+        .html(function(d) {
+            return(`${d['user_name']}<br>Avg Number of ${timeMetricLabel}: ${d[metricTimeVar]}<br>${timeChoice}: ${d[timeChoice]}`)
+        });
+    }
+
+    rectGroupTime.call(rectToolTip)
+
+    rectGroupTime.on("mouseover", rectToolTip.show)
+        .on("mouseout", rectToolTip.hide);
+    
+    return rectGroupTime;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1130,8 +1214,10 @@ function graphTime(data) {
     // Transform data into applicable form
     // var initTime = JSON.parse(data);
     var initTime = data;
+    // Initial candidate = Joe Biden
+    var initCandidate = "Joe Biden"
     // retrieve data type (hours)
-    var timeBands = initTime.map(d => d['hour']);
+    var timeBands = initTime.map(d => d[timeChoice]);
     // retrieve hourly average retweet data for candidate
     var timeAverages = initTime.map(d => d[metricTimeVar]);
     // create scalar for retweet data
@@ -1167,4 +1253,41 @@ function graphTime(data) {
         .classed("timeBands", true)
         .style("stroke", "black")
         .style("fill", (d, i) => colorBands(i))
+
+    rectGroupTime = timeToolTip(rectGroupTime, timeMetricLabel, metricTimeVar)
+
+    // Append title
+    chartGroupTime.append("text")
+        .attr("transform", `translate(${width / 2}, -15)`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "30px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1.5px")
+        .attr("font-family", "Lato")
+        .classed("time-title-label", true)
+        .text(`Average Number of ${timeMetricLabel} per ${timeChoice}: ${initCandidate}`)
+    // Append x axis label
+    chartGroupTime.append("text")
+        .attr("transform", `translate(${width / 2}, ${height + 50})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px")
+        .attr("font-family", "Roboto")
+        .classed("x-time-label", true)
+        .text(`${timeChoice}`)
+    // Append y ais label
+    chartGroupTime.append("text")
+        .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
+        .attr("text-anchor", "middle")
+        .attr("y", "-50")
+        .attr("font-size", "18px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px")
+        .attr("font-family", "Roboto")
+        .classed("y-time-label", true)
+        .text(`Average Number of ${timeMetricLabel}`)
 }

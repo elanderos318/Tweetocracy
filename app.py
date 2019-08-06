@@ -3,6 +3,7 @@ import os
 import json
 
 import datetime as dt
+import calendar
 
 from itertools import groupby
 
@@ -319,6 +320,8 @@ def time_sort(time):
     return index_select
 
 
+
+
 # Route for initializing "Time" graph
 @app.route("/time_init")
 def time_init():
@@ -341,16 +344,9 @@ def time_init():
         filter(Tweets.created_at_date <= today_date).\
         filter(Tweets.user_id_str == init_user_id)
     
-    # for query in time_query:
-    #     list_query = list(query)
-    #     list_query[3] = dt.time.strftime(list_query[3], "%H")
-    #     # list_query[3] = int(list_query[3])
-    #     tuple_query = tuple(list_query)
-    #     time_list.append(tuple_query)
-    
     time_sorted_list = sorted(time_query, key = time_sort)
 
-    keys = ("user_name", "retweet_average", "favorite_average", "hour")
+    keys = ("user_name", "retweet_average", "favorite_average", "Hour")
 
     for k, g in groupby(time_sorted_list, key = time_sort):
         current_list = list(g)
@@ -367,6 +363,113 @@ def time_init():
     session.close()
     
     return time_json
+
+def date_time_sort(datetime_query, basis):
+    index_select = datetime_query[3]
+    if basis == "Hour":
+        index_select = dt.datetime.strftime(index_select, "%H")
+        return index_select
+    elif basis == "Day":
+        index_select = dt.datetime.strftime(index_select, "%w")
+        return index_select
+
+# Route for rendering new data for "Time" table based on filter selections
+@app.route("/time_filter", methods = ["GET", "POST"])
+def time_filter():
+    if request.method == "POST":
+        #read data and conver to list of dictionary
+        data = request.data
+        filter_data = [json.loads(data.decode('utf-8'))]
+        #retrieve data variables
+        candidate_id = filter_data[0]["chosenCandidate"]
+        date_from = filter_data[0]["dateFrom"]
+        date_to = filter_data[0]["dateTo"]
+        time_basis = filter_data[0]["timeBasis"]
+
+        candidate_retrieve = list(filter(lambda x: (x["twitter_user_id"] == candidate_id), candidates_list))
+        candidate_name = candidate_retrieve[0]["name"]
+        # convert string dates into DATETIME objects
+        date_from_datetime = dt.datetime.strptime(date_from, "%b %d, %Y")
+        date_to_datetime = dt.datetime.strptime(date_to, "%b %d, %Y")
+        #convert DATETIME objects into DATE objects
+        date_from_date = date_from_datetime.date()
+        date_to_date = date_to_datetime.date()
+
+        session = Session(engine)
+
+        time_list = []
+
+        filter_query = session.query(Tweets.user_name, Tweets.retweet_count,
+            Tweets.favorite_count, Tweets.created_at_datetime).\
+            filter(Tweets.user_id_str == candidate_id).\
+            filter(Tweets.created_at_date >= date_from_date).\
+            filter(Tweets.created_at_date <= date_to_date)
+        
+        time_sorted_list = sorted(filter_query, key = lambda query: date_time_sort(query, time_basis))
+
+        keys = ("user_name", "retweet_average", "favorite_average", time_basis, "count")
+
+        for k, g in groupby(time_sorted_list, key = lambda row: date_time_sort(row, time_basis)):
+            current_list = list(g)
+            group_count = len(current_list)
+            group_retweet_list = list(map(lambda x: x[1], current_list))
+            group_favorite_list = list(map(lambda x: x[2], current_list))
+            group_retweet_average = np.mean(group_retweet_list)
+            group_favorite_average = np.mean(group_favorite_list)
+            if time_basis == "Hour":
+                group_tuple = (candidate_name, group_retweet_average, group_favorite_average, k, group_count)
+                group_dict = dict(zip(keys, group_tuple))
+                time_list.append(group_dict)
+            if time_basis == "Day":
+                k_int = int(k) - 1
+                calendar_days = list(calendar.day_abbr)
+                current_day = calendar_days[k_int]
+                group_tuple = (candidate_name, group_retweet_average, group_favorite_average, current_day, group_count)
+                group_dict = dict(zip(keys, group_tuple))
+                time_list.append(group_dict)
+
+        time_json = json.dumps(time_list)
+
+        return time_json
+
+
+# Route for updating "At a Glance" Graph with filtered selections
+@app.route("/aag_filter", methods = ["GET", "POST"])
+def aag_filter():
+    if request.method == "POST":
+        #read data and convert to list of dictionary
+        data = request.data
+        filter_data = [json.loads(data.decode('utf-8'))]
+
+        # retrieve data variables
+        candidate_ids = filter_data[0]["candidatesList"]
+        date_from = filter_data[0]["dateFrom"]
+        date_to = filter_data[0]["dateTo"]
+
+        # convert string dates into DATETIME objects
+        date_from_object = dt.datetime.strptime(date_from, "%b %d, %Y")
+        date_to_object = dt.datetime.strptime(date_to, "%b %d, %Y") + dt.timedelta(days = 1)
+
+        session = Session(engine)
+        
+        filter_query = session.query(Tweets.user_name,
+            func.avg(Tweets.retweet_count),
+            func.avg(Tweets.favorite_count)).\
+            filter(Tweets.user_id_str.in_(candidate_ids)).\
+            filter(Tweets.created_at_datetime >= date_from_object).\
+            filter(Tweets.created_at_datetime < date_to_object).\
+            group_by(Tweets.user_name).all()
+    
+        keys = ('user_name', 'retweet_average', 'favorite_average')
+        filter_list = [dict(zip(keys, values)) for values in filter_query]
+
+
+        filter_json = json.dumps(filter_list)
+
+        session.close()
+
+        return filter_json
+
 
 
 # Route for updating 'moving_average' table with recent tweet data
@@ -672,42 +775,6 @@ def moving_average_filter():
     return moving_average_json
 
 
-# Route for updating "At a Glance" Graph with filtered selections
-@app.route("/filter", methods = ["GET", "POST"])
-def filter():
-    if request.method == "POST":
-        #read data and convert to list of dictionary
-        data = request.data
-        filter_data = [json.loads(data.decode('utf-8'))]
-
-        # retrieve data variables
-        candidate_ids = filter_data[0]["candidatesList"]
-        date_from = filter_data[0]["dateFrom"]
-        date_to = filter_data[0]["dateTo"]
-
-        # convert string dates into DATETIME objects
-        date_from_object = dt.datetime.strptime(date_from, "%b %d, %Y")
-        date_to_object = dt.datetime.strptime(date_to, "%b %d, %Y") + dt.timedelta(days = 1)
-
-        session = Session(engine)
-        
-        filter_query = session.query(Tweets.user_name,
-            func.avg(Tweets.retweet_count),
-            func.avg(Tweets.favorite_count)).\
-            filter(Tweets.user_id_str.in_(candidate_ids)).\
-            filter(Tweets.created_at_datetime >= date_from_object).\
-            filter(Tweets.created_at_datetime < date_to_object).\
-            group_by(Tweets.user_name).all()
-    
-        keys = ('user_name', 'retweet_average', 'favorite_average')
-        filter_list = [dict(zip(keys, values)) for values in filter_query]
-
-
-        filter_json = json.dumps(filter_list)
-
-        session.close()
-
-        return filter_json
 
 # Functions for converting string date data received from Twitter API into datetime objects
 def convert_time(date_string):
