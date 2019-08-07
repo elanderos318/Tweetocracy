@@ -4,6 +4,7 @@ import json
 
 import datetime as dt
 import calendar
+import pytz
 
 from itertools import groupby
 
@@ -249,8 +250,8 @@ def index():
     return render_template('index.html')
 
 # Route for initializing "At a Glance" graph
-@app.route('/init_data')
-def data():
+@app.route('/aag_init')
+def aag_init():
     # Create Session for reading/updating database
     session = Session(engine)
 
@@ -314,13 +315,11 @@ def moving_average_init():
 
     return moving_average_json
 
+# Ref ("/time_init") function used for sorting query based on hour, necessary for groupby
 def time_sort(time):
     index_select = time[3]
     index_select = dt.time.strftime(index_select, "%H")
     return index_select
-
-
-
 
 # Route for initializing "Time" graph
 @app.route("/time_init")
@@ -364,6 +363,7 @@ def time_init():
     
     return time_json
 
+# Ref ("/time_filter") function used for sorting query based on hour or day, necessary for groupby
 def date_time_sort(datetime_query, basis):
     index_select = datetime_query[3]
     if basis == "Hour":
@@ -798,9 +798,9 @@ def foo():
     session = Session(engine)
     ### Fetch Timeline Data
     response_list = []
-    # for x in range(len(candidates_list)):
+    for x in range(len(candidates_list)):
 
-    for x in range(17, len(candidates_list)):
+    # for x in range(17, len(candidates_list)):
 
         candidate_name = candidates_list[x]['name']
         candidate_id = candidates_list[x]["twitter_user_id"]
@@ -981,6 +981,180 @@ def foo():
 
     return response_json
 
+@app.route("/foo_update")
+def foo_update():
+
+    # Get current datetime
+    today_datetime = dt.datetime.utcnow()
+    # Make 'today_datetime' time-zone aware
+    utc = pytz.UTC
+    today_datetime = utc.localize(today_datetime)
+
+    session = Session(engine)
+    ### Fetch Timeline Data
+    for x in range(len(candidates_list)):
+
+    # for x in range(14, len(candidates_list)):
+
+        candidate_name = candidates_list[x]['name']
+        candidate_id = candidates_list[x]["twitter_user_id"]
+
+        # Retrieve most recent date in dataset
+        max_query = session.query(func.max(Tweets.created_at_date)).\
+            filter(Tweets.user_id_str == candidate_id).first()
+        max_date = max_query[0]
+
+        # Use a date prior to max_date as a buffer in case recent updates had significant effects on data
+        buffer_date = max_date - dt.timedelta(days = 5)
+        # Retrieve first tweet_id that comes up for buffer_date
+        ref_query = session.query(Tweets.tweet_id).\
+            filter(Tweets.user_id_str == candidate_id).\
+            filter(Tweets.created_at_date <= buffer_date).first()
+        since_id_int = ref_query[0]
+
+        # print(json.dumps(user_json[0], indent = 4))
+
+        # Create threshold for while loop. Threshold will become true if tweets go past "since_id"
+        threshold = False
+
+        y = 0
+
+        while threshold == False:
+
+            y = y + 1
+
+            if y == 1:
+                user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&count=100&', params = extended_payload, auth = auth)
+            else:
+                user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&count=100&max_id={max_id}', params = extended_payload, auth = auth)
+
+            user_json = user_get.json()
+
+            print(f'Retrieving Data for {candidate_name}: Iteration {y}')
+
+            for tweet in user_json:
+                
+                print(candidate_name)
+
+                # We do not count retweets as user tweets. If retweeted_stats is true, we will continue to the next iteration
+                try:
+                    tweet["retweeted_status"]
+                    continue
+                except KeyError:
+                    pass
+
+                # Store relevant information in variables
+                created_at = tweet["created_at"]
+                tweet_id = tweet["id"]
+                tweet_id_str = tweet["id_str"]
+                full_text = tweet["full_text"]
+                in_reply_to_status_id = tweet["in_reply_to_status_id"]
+                in_reply_to_status_id_str = tweet["in_reply_to_status_id_str"]
+                in_reply_to_user_id = tweet["in_reply_to_user_id"]
+                in_reply_to_user_id_str = tweet["in_reply_to_user_id_str"]
+                user_id = tweet["user"]["id"]
+                user_id_str = tweet["user"]["id_str"]
+                user_name = tweet["user"]["name"]
+                user_screen_name = tweet["user"]["screen_name"]
+                retweet_count = tweet["retweet_count"]
+                favorite_count = tweet["favorite_count"]
+
+                created_at_time = convert_time(created_at)
+                created_at_date = convert_date(created_at)
+                created_at_datetime = convert_datetime(created_at)
+
+                #Check if threshold reached
+                if tweet_id <= since_id_int:
+                    threshold = True
+
+                #Store 'max id variable
+                if y == 1:
+                    max_id = tweet_id - 1
+
+                if tweet_id < max_id:
+                    max_id = tweet_id -1
+
+                # Query the sql table and look for tweet_id_str
+
+                tweet_query = session.query(Tweets)
+
+                if tweet_query.filter_by(tweet_id_str = tweet_id_str).count() > 0:
+                    # Select existing tweet from table
+                    existing_tweet = tweet_query.filter_by(tweet_id_str = tweet_id_str)
+                    #Update columns
+                    existing_tweet.created_at = created_at
+                    existing_tweet.tweet_id = tweet_id
+                    existing_tweet.tweet_id_str = tweet_id_str
+                    existing_tweet.full_text = full_text
+                    existing_tweet.in_reply_to_status_id = in_reply_to_status_id
+                    existing_tweet.in_reply_to_status_id_str = in_reply_to_status_id_str
+                    existing_tweet.in_reply_to_user_id = in_reply_to_user_id
+                    existing_tweet.in_reply_to_user_id_str = in_reply_to_user_id_str
+                    existing_tweet.user_id = user_id
+                    existing_tweet.user_id_str = user_id_str
+                    existing_tweet.user_name = user_name
+                    existing_tweet.user_screen_name = user_screen_name
+                    existing_tweet.retweet_count = retweet_count
+                    existing_tweet.favorite_count = favorite_count
+
+                    existing_tweet.created_at_time = created_at_time
+                    existing_tweet.created_at_date = created_at_date
+                    existing_tweet.created_at_datetime = created_at_datetime
+
+                    #stage update
+                    session.dirty
+                    #commit update
+                    session.commit()
+
+                    
+                    # Update database with update records
+                    datetime_now = dt.datetime.now()
+                    time_now = datetime_now.time()
+                    date_now = datetime_now.date()
+
+                    update_type = "tweet_data - update"
+                    update_candidate_id = candidate_id
+
+                    session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                        update_type = update_type, candidate_id_str = update_candidate_id))
+                    
+                    session.commit()
+
+                    print("existing tweet")
+                else:
+                    print("adding tweet to db")
+                    session.add(Tweets(created_at = created_at, created_at_time = created_at_time,
+                        created_at_date = created_at_date,
+                        created_at_datetime = created_at_datetime, 
+                        tweet_id = tweet_id, tweet_id_str = tweet_id_str,
+                        full_text = full_text, in_reply_to_status_id = in_reply_to_status_id,
+                        in_reply_to_status_id_str = in_reply_to_status_id_str,
+                        in_reply_to_user_id = in_reply_to_user_id, in_reply_to_user_id_str = in_reply_to_user_id_str,
+                        user_id = user_id, user_id_str = user_id_str, user_name = user_name, user_screen_name = user_screen_name,
+                        retweet_count = retweet_count, favorite_count = favorite_count))
+
+                    session.commit()
+
+                    # Update database with update records
+                    datetime_now = dt.datetime.now()
+                    time_now = datetime_now.time()
+                    date_now = datetime_now.date()
+
+                    update_type = "tweet_data - update"
+                    update_candidate_id = candidate_id
+
+                    session.add(Update(update_time = time_now, update_date = date_now, update_datetime = datetime_now,
+                        update_type = update_type, candidate_id_str = update_candidate_id))
+                    
+                    session.commit()
+
+                ################################################
+
+    session.close()
+
+    return "Complete"
+
+
 @app.route("/foo_full")
 def foo_full():
 
@@ -988,11 +1162,11 @@ def foo_full():
 
     ### Fetch Timeline Data
 
-    response_list = []
+    # for x in range(len(candidates_list)):
 
-    for x in range(len(candidates_list)):
+    # for x in range(17, len(candidates_list)):
+    for x in range(17, 18):
 
-    # for x in range(14, len(candidates_list)):
 
         candidate_name = candidates_list[x]['name']
         candidate_id = candidates_list[x]["twitter_user_id"]
@@ -1019,12 +1193,9 @@ def foo_full():
             
             try:
                 user_json = user_get.json()
-                print(json.dumps(user_json[0], indent = 4))
+                # print(json.dumps(user_json[0], indent = 4))
             except IndexError:
                 break
-            user_tweet_count = 0
-            user_retweet_total = 0
-            user_favorite_total = 0
 
             print(f'Retrieving Data for {candidate_name}: Iteration {n}')
 
@@ -1032,8 +1203,6 @@ def foo_full():
             for tweet in user_json:
                 
                 print(f'{candidate_name}')
-                print(f'Tweet Count: {user_tweet_count}')
-                print(f'Total Retweet Count: {user_retweet_total}')
 
                 # We do not count retweets as user tweets. If retweeted_stats is true, we will continue to the next iteration
                 try:
@@ -1074,14 +1243,17 @@ def foo_full():
                 created_at_datetime = convert_datetime(created_at)
 
                 if created_at_date <= candidate_date:
+                    print(created_at_date <= candidate_date)
                     announcement_date = True
+                else:
+                    print(created_at_date <= candidate_date)
 
                 #Store 'max id variable
                 if n == 1:
                     max_id = tweet_id - 1
 
                 if tweet_id < max_id:
-                    max_id = tweet_id -1
+                    max_id = tweet_id - 1
 
                 # Query the sql table and look for tweet_id_str
 
@@ -1158,31 +1330,10 @@ def foo_full():
 
                 ################################################
 
-                user_tweet_count = user_tweet_count + 1
-                user_retweet_total = user_retweet_total + retweet_count
-                user_favorite_total = user_favorite_total + favorite_count
-            try:
-                retweet_average = user_retweet_total / user_tweet_count
-                favorite_average = user_favorite_total / user_tweet_count
-            except ZeroDivisionError:
-                pass
-
-        print(f'Retweet Average for User {user_name} is {retweet_average}')
-
-        response_list.append({
-            "user": user_name,
-            "retweet_average": retweet_average,
-            "favorite_average": favorite_average,
-            "total_tweets_retrieved": user_tweet_count,
-            "total_retweets_counted": user_retweet_total
-        })
 
     session.close()
 
-    response_json = json.dumps(response_list)
-
-
-    return response_json
+    return "Complete"
 
 @app.route('/request_token')
 def request_token():

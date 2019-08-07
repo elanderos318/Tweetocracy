@@ -51,7 +51,7 @@ var height = svgHeight - margin.top - margin.bottom;
 ///////// Retrieve initial data for displaying graphs on loading page ///////////////////
 // request tweet data from server API endpoint
 
-d3.json("/init_data").then(function(data) {
+d3.json("/aag_init").then(function(data) {
     // Create at a glance graph using retrieved data
     graphAAG(data);
 }).catch(function(e) {
