@@ -363,6 +363,76 @@ def time_init():
     
     return time_json
 
+@ app.route("/histogram_init")
+def dist_init():
+    # Initiate "histogram" graph from current date to 30 days prior
+    today_datetime = dt.datetime.utcnow()
+    today_date = today_datetime.date()
+    thirty_days_ago = dt.date.today() - dt.timedelta(days = 30)
+
+    session = Session(engine)
+
+    histogram_query = session.query(Tweets.retweet_count).\
+        filter(Tweets.created_at_date >= thirty_days_ago).\
+        filter(Tweets.created_at_date <= today_date).\
+        order_by(Tweets.retweet_count)
+    # Query returned into a list of separate tuples, below combines all tuples into one
+    [histogram_query] = list(zip(*histogram_query))
+    # Create iterator
+    query_iter = iter(histogram_query)
+
+    #Find min and max values
+    range_query = session.query(func.min(Tweets.retweet_count),
+        func.max(Tweets.retweet_count)).\
+        filter(Tweets.created_at_date >=thirty_days_ago).\
+        filter(Tweets.created_at_date <= today_date).first()
+
+    min_value = range_query[0]
+    max_value = range_query[1]
+    # Find range
+    histogram_range = max_value - min_value
+
+    #Define # of histogram bars (100)
+    histogram_bars = 100
+
+    # Find range for each bar
+    bar_range = histogram_range / histogram_bars
+
+    histogram_list = []
+
+    # Create and append dicts which contain the value ranges for the bars with "0" value count
+    for x in range(0, histogram_bars):
+        begin_value = min_value + x * bar_range
+        end_value = begin_value + bar_range
+        begin_str = "{:,}".format(round(begin_value, 2))
+        end_str = "{:,}".format(round(end_value, 2))
+        range_str = begin_str + "-" + end_str
+        hist_dict = {
+            'begin': begin_value,
+            'end': end_value,
+            'tick': range_str,
+            'count': 0
+        }
+        histogram_list.append(hist_dict)
+    # Iterate through query, find a dict that fits, and increase count by one
+    # "Value Error" raised for last item in query because the filter function does not yield a dict for this value. In this case it is simple to just increase the value of the last dict by one
+    for y in query_iter:
+        try:
+            [current_bar] = list(filter(lambda x: y >= x["begin"] and y < x["end"], histogram_list))
+            current_bar["count"] += 1
+        except ValueError:
+            histogram_list[-1]["count"] += 1
+    
+    
+    histogram_json = json.dumps(histogram_list)
+
+    session.close()
+
+    return histogram_json
+
+
+
+
 # Ref ("/time_filter") function used for sorting query based on hour or day, necessary for groupby
 def date_time_sort(datetime_query, basis):
     index_select = datetime_query[3]
