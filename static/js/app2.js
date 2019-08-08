@@ -48,6 +48,50 @@ var margin = {
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
+
+// Create an SVG wrapper, append an SVG group that will hold our chart,
+// and shift the latter by left and top margins.
+var svgAAG = d3
+  .select(".at-a-glance-graph")
+  .append("svg")
+  .attr("width", svgWidth)
+  .attr("height", svgHeight);
+
+var svgMA = d3
+    .select(".moving-average-graph")
+    .append("svg")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight);
+
+var svgTime = d3
+  .select(".time-graph")
+  .append("svg")
+  .attr("width", svgWidth)
+  .attr("height", svgHeight);
+
+var svgHist = d3
+    .select(".histogram-graph")
+    .append("svg")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight + 50);
+
+
+// Append an SVG group
+var chartGroupAAG = svgAAG.append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+var chartGroupMA = svgMA.append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+var chartGroupTime = svgTime.append("g")
+  .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+  var chartGroupHist = svgHist.append("g")
+  .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+// Create color variable
+var colorBands = d3.scaleOrdinal(d3.schemeCategory20);
+
 ///////// Retrieve initial data for displaying graphs on loading page ///////////////////
 // request tweet data from server API endpoint
 
@@ -585,21 +629,6 @@ function aagToolTip(rectGroupAAG, metricLabel, metricVariable) {
 /////////////////     Create Initial "At a Glance" Graph     ///////////////
 /////////////////////////////////////////////////////////////////////////////
 
-// Create an SVG wrapper, append an SVG group that will hold our chart,
-// and shift the latter by left and top margins.
-var svgAAG = d3
-  .select(".at-a-glance-graph")
-  .append("svg")
-  .attr("width", svgWidth)
-  .attr("height", svgHeight);
-
-  // Append an SVG group
-var chartGroupAAG = svgAAG.append("g")
-.attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-// Create color variable
-var colorBands = d3.scaleOrdinal(d3.schemeCategory20);
-
 // Function to create initial AAG graph
 function graphAAG(data) {
     // transform data into applicable form
@@ -697,17 +726,6 @@ function graphAAG(data) {
 /////////////////     Create Initial Moving Average Graph     ///////////////
 /////////////////////////////////////////////////////////////////////////////
 
-// Create an SVG wrapper, append an SVG group that will hold our chart,
-// and shift the latter by left and top margins.
-var svgMA = d3
-  .select(".moving-average-graph")
-  .append("svg")
-  .attr("width", svgWidth)
-  .attr("height", svgHeight);
-
-//   Append an SVG group
-var chartGroupMA = svgMA.append("g")
-.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Function will group data by candidate and return data in a form appropriate for creating separate lines
 function candidateGroup(data) {
@@ -732,7 +750,7 @@ function candidateGroup(data) {
         lineList.push(candidateObject);
     }
 
-    console.log(lineList);
+    // console.log(lineList);
 
     return(lineList);
 }
@@ -1197,17 +1215,6 @@ function timeToolTip(rectGroupTime, timeMetricLabel, metricTimeVar) {
 ////////////////////// Create Initial "Time" Graph /////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-// Create an SVG wrapper, append an SVG group that will hold our chart,
-// and shift the latter by left and top margins.
-var svgTime = d3
-  .select(".time-graph")
-  .append("svg")
-  .attr("width", svgWidth)
-  .attr("height", svgHeight);
-
-  // Append an SVG group
-var chartGroupTime = svgTime.append("g")
-.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Function to create initial Time Graph
 function graphTime(data) {
@@ -1340,3 +1347,238 @@ function graphTime(data) {
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
+
+///////// Retrieve initial data for displaying graphs on loading page ///////////////////
+// request tweet data from server API endpoint
+d3.json("/histogram_init").then(function(data) {
+    graphHist(data);
+}).catch(function(e) {
+    console.log(e);
+})
+
+
+/////////////// Select relevant filter data for event listeners ////////////////////
+// Select "Dist" Radio Buttons
+var bidenDist = d3.select("#dist-joe-biden-radio");
+var bookerDist = d3.select("#dist-cory-booker-radio");
+var buttigiegDist = d3.select("#dist-pete-buttigieg-radio");
+var castroDist = d3.select("#dist-julian-castro-radio");
+var delaneyDist = d3.select("#dist-john-delaney-radio");
+var gabbardDist = d3.select("#dist-tulsi-gabbard-radio");
+var gillibrandDist = d3.select("#dist-kirsten-gillibrand-radio");
+var gravelDist = d3.select("#dist-mike-gravel-radio");
+var harrisDist = d3.select("#dist-kamala-harris-radio");
+var hickenlooperDist = d3.select("#dist-john-hickenlooper-radio");
+var insleeDist = d3.select("#dist-jay-inslee-radio");
+var klobucharDist = d3.select("#dist-amy-klobuchar-radio");
+var messamDist = d3.select("#dist-wayne-messam-radio");
+var moultonDist = d3.select("#dist-seth-moulton-radio");
+var rourkeDist = d3.select("#dist-beto-rourke-radio");
+var ryanDist = d3.select("#dist-tim-ryan-radio");
+var sandersDist = d3.select("#dist-bernie-sanders-radio");
+var trumpDist = d3.select("#dist-donald-trump-radio");
+var warrenDist = d3.select("#dist-elizabeth-warren-radio");
+var weldDist = d3.select("#dist-bill-weld-radio");
+var williamsonDist = d3.select("#dist-marianne-williamson-radio");
+var yangDist = d3.select("#dist-andrew-yang-radio");
+var swalwellDist = d3.select("#dist-eric-swalwell-radio");
+var bennetDist = d3.select("#dist-michael-bennet-radio");
+var bullockDist = d3.select("#dist-steve-bullock-radio");
+var blasioDist = d3.select("#dist-bill-blasio-radio");
+var sestakDist = d3.select("#dist-joe-sestak-radio");
+var steyerDist = d3.select("#dist-tom-steyer-radio");
+
+// Select Aggregation Method Buttons
+var meanRadioDist = d3.select("#dist-mean-radio");
+var medianRadioDist = d3.select("#dist-median-radio");
+
+// Select "Retweets,Favorites, or Count" Radio Buttons"
+var retweetRadioDist = d3.select("#dist-retweet-radio");
+var favoriteRadioDist = d3.select("#dist-favorite-radio");
+var countRadioDist = d3.select("#dist-count-radio");
+
+// Select "Date From" and "Date To" Inputs
+var dateFromSelectionDist = d3.select("#dist-date-from");
+var dateToSelectionDist = d3.select("#dist-date-to");
+
+// Select "dist" Submit Button
+var selectionSubmitDist = d3.select(".dist-selection-submit");
+
+// Create event listener for submit button
+selectionSubmitDist.on("click", submitDistClick);
+
+// Create Label for variable metric label display on initial load
+var distMetricLabel = "Retweets";
+// create variable for functional data type to use
+var distMetricVar = "retweet_average";
+
+function submitDistClick() {
+    // Prevent the page from refreshing
+    d3.event.preventDefault();
+
+    /////////////////////////////////////////////
+
+    // Check Aggregation Method Selected
+
+    var aggregationDistVar;
+
+    if (meanRadioDist.property("checked")) {
+        aggregationDistVar = "average";
+    } else {
+        aggregationDistVar = "median";
+    }
+
+    /////////////////////////////////////////////
+
+    // Check Retweet/Favorite Selection
+
+    if (retweetRadioDist.property("checked")) {
+        distMetricVar = "retweet_average";
+        distMetricLabel = "Retweets";
+    } else if (favoriteRadioDist.property("checked")) {
+        distMetricVar = "favorite_average";
+        distMetricLabel = "Favorites";
+    } else {
+        distMetricVar = "count";
+        distMetricLabel = "Count";
+    }
+    /////////////////////////////////////////////
+
+    // Check Date Range Selected
+
+    var dateFromTime;
+    var dateToTime;
+    dateFromTime = dateFromSelectionTime.property("value");
+    dateToTime = dateToSelectionTime.property("value");
+
+    // Create time formatter
+    var formatTime = d3.timeFormat("%b %d, %Y");
+    //// Default Dates will be set to the current date to a month ago if nothing is selected
+    var currentDate = new Date();
+    var monthAgo = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()); 
+
+    if (!dateFromTime) {
+        dateFromTime = formatTime(monthAgo);
+    }
+    if (!dateToTime) {
+        dateToTime = formatTime(currentDate);
+        }
+    // console.log(dateFrom);
+    // console.log(dateTo);
+
+    ////////////////////////////////////////////
+
+
+    filteredTimeData(chosenCandidate, metricTimeVar, aggregationTimeVar, dateFromTime, dateToTime, timeChoice);
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////// Create Initial "Histogram" Graph /////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+// Function to create initial Time Graph
+function graphHist(data) {
+    // Transform data into applicable form
+    var initHist = data;
+    // retrieve data type (value ranges)
+    var histBands = initHist.map(d => d['tick']);
+    // retrieve frequency data: initial data is retweet frequency
+    var histFreq = initHist.map(d => d['count']);
+    // create scalar for retweet data
+    // We are using log frequencies because it makes the graph more visually appealing
+    var yScaleBands = d3.scaleLog()
+        .domain([1, d3.max(histFreq)])
+        .range([height, 0]);
+    // create scalar for hourly categories
+    var xScaleBands = d3.scaleBand()
+        .domain(histBands)
+        .range([0, width])
+    // create axis, separate out the ticks because there are too many
+    var xBandsAxis = d3.axisBottom(xScaleBands)
+        .tickFormat(function(d, i) {
+            if (i % 9 == 0) {
+                return d;
+            }
+        })
+    var yBandsAxis = d3.axisLeft(yScaleBands);
+    // Append x axis
+    chartGroupHist.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .classed("x-hist-axis", true)
+        .call(xBandsAxis)
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
+    // Append y axis
+    chartGroupHist.append("g")
+        .classed("y-hist-axis", true)
+        .call(yBandsAxis);
+
+    // Append bars
+    // Account for the log scalar by replacing any 0 values with 1
+    var rectGroupHist = chartGroupHist.selectAll("rect")
+        .data(initHist)
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => xScaleBands(histBands[i]))
+        .attr("y", function(d) {
+            if (d["count"] == 0) {
+                return yScaleBands(1);
+            } else {
+                return yScaleBands(d["count"]);
+            }
+        })
+        .attr("width", xScaleBands.bandwidth())
+        .attr("height", function(d) {
+            if (d["count"] == 0) {
+                return height - yScaleBands(1);
+            } else {
+                return height - yScaleBands(d["count"]);
+            }
+        })
+        .classed("histBands", true)
+        .style("stroke", "black")
+        .style("fill", (d, i) => colorBands(i))
+
+    // rectGroupTime = timeToolTip(rectGroupTime, timeMetricLabel, metricTimeVar)
+
+    // Append title
+    chartGroupHist.append("text")
+        .attr("transform", `translate(${width / 2}, -15)`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "30px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1.5px")
+        .attr("font-family", "Lato")
+        .classed("hist-title-label", true)
+        .text(`Distribution of Log Frequencies: ${distMetricLabel}`)
+    // Append x axis label
+    chartGroupHist.append("text")
+        .attr("transform", `translate(${width / 2}, ${height + 150})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px")
+        .attr("font-family", "Roboto")
+        .classed("x-hist-label", true)
+        .text(`Value Ranges: ${distMetricLabel}`)
+    // Append y ais label
+    chartGroupHist.append("text")
+        .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
+        .attr("text-anchor", "middle")
+        .attr("y", "-50")
+        .attr("font-size", "18px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px")
+        .attr("font-family", "Roboto")
+        .classed("y-hist-label", true)
+        .text("Log Frequency")
+}
