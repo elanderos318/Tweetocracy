@@ -430,6 +430,141 @@ def dist_init():
 
     return histogram_json
 
+def day_sort(query):
+    return(query)
+
+@app.route("/histogram_filter", methods = ["GET", "POST"])
+def histogram_filter():
+    if request.method == "POST":
+        #read data and convert to list of dictionary
+        data = request.data
+        filter_data = [json.loads(data.decode('utf-8'))]
+        #retrieve data variables
+        candidate_ids = filter_data[0]["candidatesList"]
+        date_from = filter_data[0]["dateFrom"]
+        date_to = filter_data[0]["dateTo"]
+        metric_var = filter_data[0]["distMetricVar"]
+
+        # convert string dates into DATETIME objects
+        date_from_datetime = dt.datetime.strptime(date_from, "%b %d, %Y")
+        date_to_datetime = dt.datetime.strptime(date_to, "%b %d, %Y")
+        #convert DATETIME objects into DATE objects
+        date_from_date = date_from_datetime.date()
+        date_to_date = date_to_datetime.date()
+
+        session = Session(engine)
+
+        histogram_list = []
+        
+        if metric_var == "retweet_count":
+
+            histogram_query = session.query(Tweets.retweet_count).\
+                filter(Tweets.user_id_str.in_(candidate_ids)).\
+                filter(Tweets.created_at_date >= date_from_date).\
+                filter(Tweets.created_at_date <= date_to_date).\
+                order_by(Tweets.retweet_count)
+
+            [histogram_query] = list(zip(*histogram_query))
+
+            query_iter = iter(histogram_query)
+
+            #Find min and max values
+            range_query = session.query(func.min(Tweets.retweet_count),
+                func.max(Tweets.retweet_count)).\
+                filter(Tweets.user_id_str.in_(candidate_ids)).\
+                filter(Tweets.created_at_date >= date_from_date).\
+                filter(Tweets.created_at_date <= date_to_date).first()
+            min_value = range_query[0]
+            max_value = range_query[1]
+            # Find range
+            histogram_range = max_value - min_value
+            #Define # of histogram bars (100)
+            histogram_bars = 100
+            # Find range for each bar
+            bar_range = histogram_range / histogram_bars
+
+            # Create and append dicts which contain the value ranges for the bars with "0" value count
+            for x in range(0, histogram_bars):
+                begin_value = min_value + x * bar_range
+                end_value = begin_value + bar_range
+                begin_str = "{:,}".format(round(begin_value, 2))
+                end_str = "{:,}".format(round(end_value, 2))
+                range_str = begin_str + "-" + end_str
+                hist_dict = {
+                    'begin': begin_value,
+                    'end': end_value,
+                    'tick': range_str,
+                    'count': 0
+                }
+                histogram_list.append(hist_dict)
+
+            # Iterate through query, find a dict that fits, and increase count by one
+            # "Value Error" raised for last item in query because the filter function does not yield a dict for this value. In this case it is simple to just increase the value of the last dict by one
+            for y in query_iter:
+                try:
+                    [current_bar] = list(filter(lambda x: y >= x["begin"] and y < x["end"], histogram_list))
+                    current_bar["count"] += 1
+                except ValueError:
+                    histogram_list[-1]["count"] += 1
+
+
+        else:
+
+            histogram_query = session.query(Tweets.favorite_count).\
+                filter(Tweets.user_id_str.in_(candidate_ids)).\
+                filter(Tweets.created_at_date >= date_from_date).\
+                filter(Tweets.created_at_date <= date_to_date).\
+                order_by(Tweets.favorite_count)
+
+            [histogram_query] = list(zip(*histogram_query))
+
+            query_iter = iter(histogram_query)
+
+            #Find min and max values
+            range_query = session.query(func.min(Tweets.favorite_count),
+                func.max(Tweets.favorite_count)).\
+                filter(Tweets.user_id_str.in_(candidate_ids)).\
+                filter(Tweets.created_at_date >= date_from_date).\
+                filter(Tweets.created_at_date <= date_to_date).first()
+            min_value = range_query[0]
+            max_value = range_query[1]
+            # Find range
+            histogram_range = max_value - min_value
+            #Define # of histogram bars (100)
+            histogram_bars = 100
+            # Find range for each bar
+            bar_range = histogram_range / histogram_bars
+
+            # Create and append dicts which contain the value ranges for the bars with "0" value count
+            for x in range(0, histogram_bars):
+                begin_value = min_value + x * bar_range
+                end_value = begin_value + bar_range
+                begin_str = "{:,}".format(round(begin_value, 2))
+                end_str = "{:,}".format(round(end_value, 2))
+                range_str = begin_str + "-" + end_str
+                hist_dict = {
+                    'begin': begin_value,
+                    'end': end_value,
+                    'tick': range_str,
+                    'count': 0
+                }
+                histogram_list.append(hist_dict)
+
+            # Iterate through query, find a dict that fits, and increase count by one
+            # "Value Error" raised for last item in query because the filter function does not yield a dict for this value. In this case it is simple to just increase the value of the last dict by one
+            for y in query_iter:
+                try:
+                    [current_bar] = list(filter(lambda x: y >= x["begin"] and y < x["end"], histogram_list))
+                    current_bar["count"] += 1
+                except ValueError:
+                    histogram_list[-1]["count"] += 1
+
+
+        histogram_json = json.dumps(histogram_list)
+
+        session.close()
+
+        return histogram_json
 
 
 
@@ -447,7 +582,7 @@ def date_time_sort(datetime_query, basis):
 @app.route("/time_filter", methods = ["GET", "POST"])
 def time_filter():
     if request.method == "POST":
-        #read data and conver to list of dictionary
+        #read data and convert to list of dictionary
         data = request.data
         filter_data = [json.loads(data.decode('utf-8'))]
         #retrieve data variables
@@ -455,7 +590,7 @@ def time_filter():
         date_from = filter_data[0]["dateFrom"]
         date_to = filter_data[0]["dateTo"]
         time_basis = filter_data[0]["timeBasis"]
-
+        # Find candidate with corresponding candidate id and retrieve their name
         candidate_retrieve = list(filter(lambda x: (x["twitter_user_id"] == candidate_id), candidates_list))
         candidate_name = candidate_retrieve[0]["name"]
         # convert string dates into DATETIME objects

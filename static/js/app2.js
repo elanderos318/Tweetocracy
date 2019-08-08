@@ -1359,34 +1359,34 @@ d3.json("/histogram_init").then(function(data) {
 
 /////////////// Select relevant filter data for event listeners ////////////////////
 // Select "Dist" Radio Buttons
-var bidenDist = d3.select("#dist-joe-biden-radio");
-var bookerDist = d3.select("#dist-cory-booker-radio");
-var buttigiegDist = d3.select("#dist-pete-buttigieg-radio");
-var castroDist = d3.select("#dist-julian-castro-radio");
-var delaneyDist = d3.select("#dist-john-delaney-radio");
-var gabbardDist = d3.select("#dist-tulsi-gabbard-radio");
-var gillibrandDist = d3.select("#dist-kirsten-gillibrand-radio");
-var gravelDist = d3.select("#dist-mike-gravel-radio");
-var harrisDist = d3.select("#dist-kamala-harris-radio");
-var hickenlooperDist = d3.select("#dist-john-hickenlooper-radio");
-var insleeDist = d3.select("#dist-jay-inslee-radio");
-var klobucharDist = d3.select("#dist-amy-klobuchar-radio");
-var messamDist = d3.select("#dist-wayne-messam-radio");
-var moultonDist = d3.select("#dist-seth-moulton-radio");
-var rourkeDist = d3.select("#dist-beto-rourke-radio");
-var ryanDist = d3.select("#dist-tim-ryan-radio");
-var sandersDist = d3.select("#dist-bernie-sanders-radio");
-var trumpDist = d3.select("#dist-donald-trump-radio");
-var warrenDist = d3.select("#dist-elizabeth-warren-radio");
-var weldDist = d3.select("#dist-bill-weld-radio");
-var williamsonDist = d3.select("#dist-marianne-williamson-radio");
-var yangDist = d3.select("#dist-andrew-yang-radio");
-var swalwellDist = d3.select("#dist-eric-swalwell-radio");
-var bennetDist = d3.select("#dist-michael-bennet-radio");
-var bullockDist = d3.select("#dist-steve-bullock-radio");
-var blasioDist = d3.select("#dist-bill-blasio-radio");
-var sestakDist = d3.select("#dist-joe-sestak-radio");
-var steyerDist = d3.select("#dist-tom-steyer-radio");
+var bidenDist = d3.select("#dist-joe-biden-checkbox");
+var bookerDist = d3.select("#dist-cory-booker-checkbox");
+var buttigiegDist = d3.select("#dist-pete-buttigieg-checkbox");
+var castroDist = d3.select("#dist-julian-castro-checkbox");
+var delaneyDist = d3.select("#dist-john-delaney-checkbox");
+var gabbardDist = d3.select("#dist-tulsi-gabbard-checkbox");
+var gillibrandDist = d3.select("#dist-kirsten-gillibrand-checkbox");
+var gravelDist = d3.select("#dist-mike-gravel-checkbox");
+var harrisDist = d3.select("#dist-kamala-harris-checkbox");
+var hickenlooperDist = d3.select("#dist-john-hickenlooper-checkbox");
+var insleeDist = d3.select("#dist-jay-inslee-checkbox");
+var klobucharDist = d3.select("#dist-amy-klobuchar-checkbox");
+var messamDist = d3.select("#dist-wayne-messam-checkbox");
+var moultonDist = d3.select("#dist-seth-moulton-checkbox");
+var rourkeDist = d3.select("#dist-beto-rourke-checkbox");
+var ryanDist = d3.select("#dist-tim-ryan-checkbox");
+var sandersDist = d3.select("#dist-bernie-sanders-checkbox");
+var trumpDist = d3.select("#dist-donald-trump-checkbox");
+var warrenDist = d3.select("#dist-elizabeth-warren-checkbox");
+var weldDist = d3.select("#dist-bill-weld-checkbox");
+var williamsonDist = d3.select("#dist-marianne-williamson-checkbox");
+var yangDist = d3.select("#dist-andrew-yang-checkbox");
+var swalwellDist = d3.select("#dist-eric-swalwell-checkbox");
+var bennetDist = d3.select("#dist-michael-bennet-checkbox");
+var bullockDist = d3.select("#dist-steve-bullock-checkbox");
+var blasioDist = d3.select("#dist-bill-blasio-checkbox");
+var sestakDist = d3.select("#dist-joe-sestak-checkbox");
+var steyerDist = d3.select("#dist-tom-steyer-checkbox");
 
 // Select Aggregation Method Buttons
 var meanRadioDist = d3.select("#dist-mean-radio");
@@ -1413,8 +1413,98 @@ var distMetricLabel = "Retweets";
 var distMetricVar = "retweet_average";
 
 function submitDistClick() {
+    // Create list to append all checked candidates
+    var candidatesList = [];
     // Prevent the page from refreshing
     d3.event.preventDefault();
+
+    ////////////////////////////////////////////////////
+    // Append list with names whose boxes are checked
+    if (bidenDist.property("checked")) {
+        candidatesList.push("939091");
+    }
+    if (bookerDist.property("checked")) {
+        candidatesList.push("15808765");
+    }
+    if (buttigiegDist.property("checked")) {
+        candidatesList.push("226222147");
+    }
+    if (castroDist.property("checked")) {
+        candidatesList.push("19682187");
+    }
+    if (delaneyDist.property("checked")) {
+        candidatesList.push("426028646");
+    }
+    if (gabbardDist.property("checked")) {
+        candidatesList.push("26637348");
+    }
+    if (gillibrandDist.property("checked")) {
+        candidatesList.push("72198806");
+    }
+    if (gravelDist.property("checked")) {
+        candidatesList.push("14709326");
+    }
+    if (harrisDist.property("checked")) {
+        candidatesList.push("30354991");
+    }
+    if (hickenlooperDist.property("checked")) {
+        candidatesList.push("117839957");
+    }
+    if (insleeDist.property("checked")) {
+        candidatesList.push("21789463");
+    }
+    if (klobucharDist.property("checked")) {
+        candidatesList.push("33537967");
+    }
+    if (messamDist.property("checked")) {
+        candidatesList.push("33954145");
+    }
+    if (moultonDist.property("checked")) {
+        candidatesList.push("248495200");
+    }
+    if (rourkeDist.property("checked")) {
+        candidatesList.push("342863309");
+    }
+    if (ryanDist.property("checked")) {
+        candidatesList.push("466532637");
+    }
+    if (sandersDist.property("checked")) {
+        candidatesList.push("216776631");
+    }
+    if (trumpDist.property("checked")) {
+        candidatesList.push("25073877");
+    }
+    if (warrenDist.property("checked")) {
+        candidatesList.push("357606935");
+    }
+    if (weldDist.property("checked")) {
+        candidatesList.push("734783792502575105");
+    }
+    if (williamsonDist.property("checked")) {
+        candidatesList.push("21522338");
+    }
+    if (yangDist.property("checked")) {
+        candidatesList.push("2228878592");
+    }
+    if (swalwellDist.property("checked")) {
+        candidatesList.push("942156122");
+    }
+    if (bennetDist.property("checked")) {
+        candidatesList.push("45645232");
+    }
+    if (bullockDist.property("checked")) {
+        candidatesList.push("111721601");
+    }
+    if (blasioDist.property("checked")) {
+        candidatesList.push("476193064");
+    }
+    if (sestakDist.property("checked")) {
+        candidatesList.push("46764631");
+    }
+    if (steyerDist.property("checked")) {
+        candidatesList.push("949934436");
+    }
+
 
     /////////////////////////////////////////////
 
@@ -1433,23 +1523,20 @@ function submitDistClick() {
     // Check Retweet/Favorite Selection
 
     if (retweetRadioDist.property("checked")) {
-        distMetricVar = "retweet_average";
+        distMetricVar = "retweet_count";
         distMetricLabel = "Retweets";
-    } else if (favoriteRadioDist.property("checked")) {
-        distMetricVar = "favorite_average";
-        distMetricLabel = "Favorites";
     } else {
-        distMetricVar = "count";
-        distMetricLabel = "Count";
+        distMetricVar = "favorite_count";
+        distMetricLabel = "Favorites";
     }
     /////////////////////////////////////////////
 
     // Check Date Range Selected
 
-    var dateFromTime;
-    var dateToTime;
-    dateFromTime = dateFromSelectionTime.property("value");
-    dateToTime = dateToSelectionTime.property("value");
+    var dateFromDist;
+    var dateToDist;
+    dateFromDist = dateFromSelectionDist.property("value");
+    dateToDist = dateToSelectionDist.property("value");
 
     // Create time formatter
     var formatTime = d3.timeFormat("%b %d, %Y");
@@ -1457,20 +1544,155 @@ function submitDistClick() {
     var currentDate = new Date();
     var monthAgo = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()); 
 
-    if (!dateFromTime) {
-        dateFromTime = formatTime(monthAgo);
+    if (!dateFromDist) {
+        dateFromDist = formatTime(monthAgo);
     }
-    if (!dateToTime) {
-        dateToTime = formatTime(currentDate);
+    if (!dateToDist) {
+        dateToDist = formatTime(currentDate);
         }
-    // console.log(dateFrom);
-    // console.log(dateTo);
+
 
     ////////////////////////////////////////////
 
 
-    filteredTimeData(chosenCandidate, metricTimeVar, aggregationTimeVar, dateFromTime, dateToTime, timeChoice);
+    filteredDistData(candidatesList, distMetricVar, aggregationDistVar, dateFromDist, dateToDist);
 
+}
+
+// Function for filtering based on filter selection
+function filteredDistData(candidatesList, distMetricVar, aggregationDistVar, dateFromDist, dateToDist) {
+    //// Send a POST request to the backend to filter data for "Hist" bar chart
+    d3.json("/histogram_filter", {
+        method: "POST",
+        body: JSON.stringify({
+            candidatesList: candidatesList,
+            dateFrom: dateFromDist,
+            dateTo: dateToDist,
+            distMetricVar: distMetricVar
+        }),
+        headers: {
+            "Content-type": "application/json; charset-UTF-i"
+        }
+    }).then(json => {
+
+        var histData = json;
+        /// set our x and y variables
+        var histBands = json.map(d => d["tick"]);
+        var histCount = json.map(d => d["count"]);
+
+        // Select Labels
+        var histTitle = d3.select(".hist-title-label");
+        var xHistLabel = d3.select(".x-hist-label");
+        var yHistLabel = d3.select(".y-hist-label");
+
+        // Generate new xaxis sclar, select current x-axis, and render/transition to new axis
+        xScaleHistBands = xHistBands(histBands);
+        xHistBandsAxis = d3.select(".x-hist-axis");
+        renderXHistBandsAxis(xScaleHistBands, xHistBandsAxis);
+        // Generate new yaxis scalar, select current y-axis, and render/transition to new axis
+        yScaleHistBands = yHistBands(histCount);
+        yHistBandsAxis = d3.select(".y-hist-axis");
+        renderYHistBandsAxis(yScaleHistBands, yHistBandsAxis);
+
+        //Generate new Bars
+        renderHistRect(histBands, xScaleHistBands, histData, histTitle, yScaleHistBands, xHistLabel, distMetricLabel);
+
+
+    })
+}
+
+// function used for updated "Hist" Graph Bars
+function renderHistRect(histBands, xScaleHistBands, histData, histTitle, yScaleHistBands, xHistLabel, distMetricLabel) {
+    // Select current bars and pass in filtered data
+    var rectGroupHist = chartGroupHist.selectAll("rect")
+        .data(histData)
+    // Enter any new data, merge/update existing data
+        rectGroupHist.enter()
+        .append("rect")
+        .merge(rectGroupHist)
+        .style("fill", (d, i) => colorBands(i))
+        .style("stroke", "black")
+        .attr("x", (d, i) => xScaleHistBands(histBands[i]))
+        .attr("y", function(d, i) {
+            if (d["count"] == 0) {
+                return yScaleHistBands(1);
+            } else {
+                return yScaleHistBands(d["count"]);
+            }
+        })
+        .attr("width", d => xScaleHistBands.bandwidth())
+        .attr("height", function(d, i) {
+            if (d["count"] == 0) {
+                return height - yScaleHistBands(1);
+            } else {
+                return height - yScaleHistBands(d["count"]);
+            }
+        })
+    // Remove any left over data
+    rectGroupHist.exit().remove();
+
+    // Update Labels
+    histTitle.transition()
+        .duration(1000)
+        .text(`Distribution of Log Frequencies: ${distMetricLabel}`);
+
+    xHistLabel.transition()
+        .duration(1000)
+        .text(`Value Ranges: ${distMetricLabel}`);
+
+    return rectGroupHist;
+}
+
+// function used for updateing y-axis scalar
+function yHistBands(histCount) {
+    // Create Scalar
+    var yScaleHistBands = d3.scaleLog()
+        .domain([1, d3.max(histCount)])
+        .range([height, 0]);
+
+    return yScaleHistBands;
+}
+
+// function used for updating Y Axis
+function renderYHistBandsAxis(yScaleHistBands, yHistBandsAxis) {
+    var leftAxis = d3.axisLeft(yScaleHistBands);
+
+    yHistBandsAxis.transition()
+        .duration(1000)
+        .call(leftAxis);
+
+    return yHistBandsAxis;
+}
+// function used for updating x-axis scalar
+function xHistBands(histBands) {
+    // Create Scale
+    var xScaleHistBands = d3.scaleBand()
+        .domain(histBands)
+        .range([0, width])
+
+    return xScaleHistBands;
+}
+// function used for updateing X Axis
+function renderXHistBandsAxis(xScaleHistBands, xHistBandsAxis) {
+
+    var bottomAxis = d3.axisBottom(xScaleHistBands)
+        .tickFormat(function(d, i) {
+            if (i % 9 == 0) {
+                return d;
+            }
+        })
+
+    xHistBandsAxis.transition()
+        .duration(1000)
+        .call(bottomAxis)
+        .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(90)")
+            .style("text-anchor", "start");
+
+    return xHistBandsAxis;
 }
 
 
