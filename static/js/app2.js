@@ -1619,6 +1619,168 @@ function filteredDistData(candidatesList, distMetricVar, aggregationDistVar, dat
         //Generate new Bars
         renderHistRect(histBands, xScaleHistBands, histData, histTitle, yScaleHistBands, xHistLabel, distMetricLabel);
     })
+    //// Send a POST request to the backend to filter data for "Box Plot" bar chart
+    d3.json("/box_plot_filter", {
+        method: "POST",
+        body: JSON.stringify({
+            candidatesList: candidatesList,
+            dateFrom: dateFromDist,
+            dateTo: dateToDist,
+            distMetricVar: distMetricVar
+        }),
+        headers: {
+            "Content-type": "application/json; charset-UTF-i"
+        }
+        }).then(json => {
+            var boxData = json;
+            // set our variables
+            var boxBands = json.map(d => d["user_name"]);
+            var maxData = boxData.map(d => d["max"]);
+            var minData = boxData.map(d => d["min"]);
+
+            // Generate new xaxis scalar, select current x-axis, and render/transition to new axis
+            var xBoxScale = xBoxBands(boxBands);
+            var xBoxAxis = d3.select(".x-box-axis");
+            renderXBoxAxis(xBoxScale, xBoxAxis);
+            // Generate new yaxis scalar, select current y-axis and render/transition to new axis
+            var yBoxScale = yBoxBands(maxData, minData);
+            var yBoxAxis = d3.select(".y-box-axis");
+            renderYBoxAxis(yBoxScale, yBoxAxis);
+
+            // Select Labels   
+            var boxTitle = d3.select(".box-title-label");
+            var yBoxLabel = d3.select(".y-box-label");
+            
+            renderBoxRect(boxData, boxBands, xBoxScale, boxTitle, yBoxLabel, yBoxScale, distMetricLabel);
+        })
+    
+}
+
+// Function for rendering new rects
+function renderBoxRect(boxData, boxBands, xBoxScale, boxTitle, yBoxLabel, yBoxScale, distMetricLabel) {
+    // Select current bars and pass in filteredData
+    var rectGroupBox = chartGroupBox.selectAll(".boxes")
+        .data(boxData)
+    // Enter any new data, merge/update existing data
+        rectGroupBox.enter()
+        .append("rect")
+        .merge(rectGroupBox)
+        .attr("x", function(d,i) {
+            return (xBoxScale(boxBands[i]));
+        })
+        .attr("y", function(d) {
+            return (yBoxScale(d["q3"]));
+        })
+        .attr("height", function(d) {
+            return (yBoxScale(d["q1"]) - yBoxScale(d["q3"]));
+        })
+        .attr("width", d => xBoxScale.bandwidth())
+        .attr("stroke", "black")
+        .style("fill", "#69b3a2")
+    // Remove any left over data
+    rectGroupBox.exit().remove();
+
+    // Select current verticle line and pass in filtered Data
+    var verticleLines = d3.selectAll(".vertLines")
+        .data(boxData)
+        verticleLines.enter()
+        .append("line")
+        .merge(verticleLines)
+        .attr("x1", function(d, i) {
+            return(xBoxScale(boxBands[i]) + xBoxScale.bandwidth()/2);
+        })
+        .attr("x2", function(d, i) {
+            return(xBoxScale(boxBands[i]) + xBoxScale.bandwidth()/2);
+        })
+        .attr("y1", function(d) {
+            return(yBoxScale(d["min"]));
+        })
+        .attr("y2", function(d) {
+            return(yBoxScale(d["max"]));
+        })
+        .attr("stroke", "black")
+        .attr("width", 40)
+    verticleLines.exit().remove();
+
+    // Select current median lines and pass in filtered data
+    var medianLines = d3.selectAll(".medianLines")
+        .data(boxData)
+        medianLines.enter()
+        .append("line")
+        .merge(medianLines)
+        .attr("x1", function(d, i) {
+            return(xBoxScale(boxBands[i]));
+        })
+        .attr("x2", function(d, i) {
+            return(xBoxScale(boxBands[i])+ xBoxScale.bandwidth());
+        })
+        .attr("y1", function(d) {
+            return (yBoxScale(d["median"]));
+        })
+        .attr("y2", function(d) {
+            return (yBoxScale(d["median"]));
+        })
+        .attr("stroke", "black")
+        .style("width", 50)
+    medianLines.exit().remove();
+
+    boxTitle.transition()
+        .duration(1000)
+        .text(`Candidate Box Plots (ln transformed): ${distMetricLabel}`);
+
+    yBoxLabel.transition()
+        .duration(1000)
+        .text(`${distMetricLabel} (ln transformed)`)
+
+    return rectGroupBox;
+}
+
+// Function for creating new y scale
+function yBoxBands(maxData, minData) {
+    var yBoxScale = d3.scaleLinear()
+        .domain([(d3.min(minData) - d3.max(maxData) *.05), d3.max(maxData) * 1.05])
+        .range([height, 0]);
+
+    return yBoxScale;
+}
+
+// Function for rendering new y Axis
+function renderYBoxAxis(yBoxScale, yBoxAxis) {
+    var leftAxis = d3.axisLeft(yBoxScale);
+
+    yBoxAxis.transition()
+        .duration(1000)
+        .call(leftAxis);
+
+    return yBoxAxis;
+}
+
+// Function for creating new scale
+function xBoxBands(boxBands) {
+    var xBoxScale = d3.scaleBand()
+        .domain(boxBands)
+        .range([0, width])
+        .paddingInner([0.1])
+        .paddingOuter([0.5]);
+
+    return xBoxScale;
+}
+
+// Funciton for rendering new xScale
+function renderXBoxAxis(xBoxScale, xBoxAxis) {
+    var bottomAxis = d3.axisBottom(xBoxScale);
+
+    xBoxAxis.transition()
+        .duration(1000)
+        .call(bottomAxis)
+        .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(90)")
+            .style("text-anchor", "start");
+
+    return xBoxAxis;
 }
 
 // function used for updated "Hist" Graph Bars
@@ -1849,7 +2011,7 @@ function graphBox(data) {
     var minData = boxData.map(d => d["min"]);
 
     var yScaleLinear = d3.scaleLinear()
-        .domain([d3.min(minData) * 0.95, d3.max(maxData) * 1.05])
+        .domain([(d3.min(minData) - d3.max(maxData) *.05), d3.max(maxData) * 1.05])
         .range([height, 0]);
 
     // var maxSelection = d3.max(1, d3.min(minData));
@@ -1893,6 +2055,7 @@ function graphBox(data) {
         .data(boxData)
         .enter()
         .append("line")
+        .classed("vertLines", true)
         .attr("x1", function(d, i){
             return(xScaleBands(boxBands[i]) + xScaleBands.bandwidth()/2)
         })
@@ -1912,6 +2075,7 @@ function graphBox(data) {
         .data(boxData)
         .enter()
         .append("rect")
+        .classed("boxes", true)
         .attr("x", function(d,i) {
             return (xScaleBands(boxBands[i]));
         })
@@ -1929,6 +2093,7 @@ function graphBox(data) {
         .data(boxData)
         .enter()
         .append("line")
+        .classed("medianLines", true)
         .attr("x1", function(d, i) {
             return (xScaleBands(boxBands[i]));
         })
@@ -1953,7 +2118,7 @@ function graphBox(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1.5px")
         .attr("font-family", "Lato")
-        .classed("hist-title-label", true)
+        .classed("box-title-label", true)
         .text(`Candidate Box Plots (ln transformed): ${distMetricLabel}`)
     // Append x axis label
     chartGroupBox.append("text")
@@ -1964,7 +2129,7 @@ function graphBox(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1px")
         .attr("font-family", "Roboto")
-        .classed("x-hist-label", true)
+        .classed("x-box-label", true)
         .text(`Candidate`)
     // Append y ais label
     chartGroupBox.append("text")
@@ -1976,7 +2141,7 @@ function graphBox(data) {
         .attr("stroke", "black")
         .attr("stroke-width", "1px")
         .attr("font-family", "Roboto")
-        .classed("y-hist-label", true)
+        .classed("y-box-label", true)
         .text(`${distMetricLabel} (ln transformed)`)
 
 

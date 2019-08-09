@@ -492,6 +492,92 @@ def box_plot_init():
 
     return box_json
 
+# Route for sending back filtered data for box plot
+@app.route("/box_plot_filter", methods = ["GET", "POST"])
+def box_plot_filter():
+
+    if request.method == "POST":
+        data = request.data
+        filter_data = [json.loads(data.decode('utf-8'))]
+        #retrieve data variables
+        candidate_ids = filter_data[0]["candidatesList"]
+        date_from = filter_data[0]["dateFrom"]
+        date_to = filter_data[0]["dateTo"]
+        metric_var = filter_data[0]["distMetricVar"]
+
+        # convert string dates into DATETIME objects
+        date_from_datetime = dt.datetime.strptime(date_from, "%b %d, %Y")
+        date_to_datetime = dt.datetime.strptime(date_to, "%b %d, %Y")
+        #convert DATETIME objects into DATE objects
+        date_from_date = date_from_datetime.date()
+        date_to_date = date_to_datetime.date()
+
+        session = Session(engine)
+
+        keys = ("user_name", "min", "q1", "median", "q3", "max")
+
+        box_list = []
+        # group by candidate
+        # Data will be log transformed for a more visually appealing graph
+        # we replace all zeroes with one
+        # values are transformed to float/int bc json cannot parse data otherwise
+
+        if metric_var == "retweet_count":
+            # Create query
+            box_query = session.query(Tweets.user_name, Tweets.user_id_str, Tweets.retweet_count).\
+                filter(Tweets.user_id_str.in_(candidate_ids)).\
+                filter(Tweets.created_at_date >= date_from_date).\
+                filter(Tweets.created_at_date <= date_to_date)
+            # sort list according to candidate
+            box_sorted = sorted(box_query, key = user_sort)
+            for k, g in groupby(box_sorted, key = user_sort):
+                current_list = list(g)
+                new_list = list(map(lambda x: replace_zero(x), current_list))
+                retweet_list = list(map(lambda x: x[2], new_list))
+                log_list = list(np.log(retweet_list))
+                retweet_median = float(np.median(log_list))
+                retweet_q1 = float(np.quantile(log_list, .25))
+                retweet_q3 = float(np.quantile(log_list, .75))       
+                retweet_min = int(np.min(log_list))
+                retweet_max = int(np.max(log_list))
+                user_id = k
+                [user_dict] = list(filter(lambda x: x["twitter_user_id"] == user_id, candidates_list))
+                user_name = user_dict["name"]
+                user_tuple = (user_name, retweet_min, retweet_q1, retweet_median, retweet_q3, retweet_max)
+                response_dict = dict(zip(keys, user_tuple))
+                box_list.append(response_dict)
+                
+        elif metric_var == "favorite_count":
+            # Create query
+            box_query = session.query(Tweets.user_name, Tweets.user_id_str, Tweets.favorite_count).\
+                filter(Tweets.user_id_str.in_(candidate_ids)).\
+                filter(Tweets.created_at_date >= date_from_date).\
+                filter(Tweets.created_at_date <= date_to_date)
+            # sort list according to candidate
+            box_sorted = sorted(box_query, key = user_sort)
+
+            for k, g in groupby(box_sorted, key = user_sort):
+                current_list = list(g)
+                new_list = list(map(lambda x: replace_zero(x), current_list))
+                favorite_list = list(map(lambda x: x[2], new_list))
+                log_list = list(np.log(favorite_list))
+                favorite_median = float(np.median(log_list))
+                favorite_q1 = float(np.quantile(log_list, .25))
+                favorite_q3 = float(np.quantile(log_list, .75))       
+                favorite_min = int(np.min(log_list))
+                favorite_max = int(np.max(log_list))
+                user_id = k
+                [user_dict] = list(filter(lambda x: x["twitter_user_id"] == user_id, candidates_list))
+                user_name = user_dict["name"]
+                user_tuple = (user_name, favorite_min, favorite_q1, favorite_median, favorite_q3, favorite_max)
+                response_dict = dict(zip(keys, user_tuple))
+                box_list.append(response_dict)
+
+        box_json = json.dumps(box_list)
+
+        session.close()
+
+        return box_json
 
 
 # Function for sorting and to call for "key" argument in groupby
