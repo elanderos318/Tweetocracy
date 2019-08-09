@@ -430,6 +430,71 @@ def dist_init():
 
     return histogram_json
 
+
+def user_sort(query):
+    index_select = query[1]
+    return index_select
+
+def replace_zero(item):
+    item_list = list(item)
+    index_select = item[2]
+    if index_select == 0:
+        index_select = 1
+        item_list.pop(0)
+        item_list.append(index_select)
+        return item_list
+    else:
+        return item_list
+
+@app.route("/box_plot_init")
+def box_plot_init():
+
+    # Initiate "histogram" graph from current date to 30 days prior
+    today_datetime = dt.datetime.utcnow()
+    today_date = today_datetime.date()
+    thirty_days_ago = dt.date.today() - dt.timedelta(days = 30)
+
+    session = Session(engine)
+    # Create query
+    box_query = session.query(Tweets.user_name, Tweets.user_id_str, Tweets.retweet_count).\
+        filter(Tweets.created_at_date >= thirty_days_ago).\
+        filter(Tweets.created_at_date <= today_date)
+    # sort list according to candidate
+    box_sorted = sorted(box_query, key = user_sort)
+
+    keys = ("user_name", "min", "q1", "median", "q3", "max")
+
+    box_list = []
+    # group by candidate
+    # Data will be log transformed for a more visually appealing graph
+    # we replace all zeroes with one
+    # values are transformed to float/int bc json cannot parse data otherwise
+    for k, g in groupby(box_sorted, key = user_sort):
+        current_list = list(g)
+        new_list = list(map(lambda x: replace_zero(x), current_list))
+        retweet_list = list(map(lambda x: x[2], new_list))
+        log_list = list(np.log(retweet_list))
+        retweet_median = float(np.median(log_list))
+        retweet_q1 = float(np.quantile(log_list, .25))
+        retweet_q3 = float(np.quantile(log_list, .75))       
+        retweet_min = int(np.min(log_list))
+        retweet_max = int(np.max(log_list))
+        user_id = k
+        [user_dict] = list(filter(lambda x: x["twitter_user_id"] == user_id, candidates_list))
+        user_name = user_dict["name"]
+        user_tuple = (user_name, retweet_min, retweet_q1, retweet_median, retweet_q3, retweet_max)
+        response_dict = dict(zip(keys, user_tuple))
+        box_list.append(response_dict)
+
+    box_json = json.dumps(box_list)
+
+    session.close()
+
+    return box_json
+
+
+
+# Function for sorting and to call for "key" argument in groupby
 def day_sort(query):
     return(query)
 

@@ -75,6 +75,11 @@ var svgHist = d3
     .attr("width", svgWidth)
     .attr("height", svgHeight + 50);
 
+var svgBox = d3
+    .select(".box-plot-graph")
+    .append("svg")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight);
 
 // Append an SVG group
 var chartGroupAAG = svgAAG.append("g")
@@ -86,8 +91,11 @@ var chartGroupMA = svgMA.append("g")
 var chartGroupTime = svgTime.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-  var chartGroupHist = svgHist.append("g")
+var chartGroupHist = svgHist.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+var chartGroupBox = svgBox.append("g")
+    .attr("transform",`translate(${margin.left}, ${margin.top})`)
 
 // Create color variable
 var colorBands = d3.scaleOrdinal(d3.schemeCategory20);
@@ -1059,7 +1067,6 @@ function submitTimeClick() {
 // Function for filtering based on filter selection
 function filteredTimeData(chosenCandidate, metricTimeVar, aggregationTimeVar, dateFromTime, dateToTime, timeChoice) {
     //// Send a POST request to the backend to filter data for "Time" bar chart
-    console.log(chosenCandidate);
     d3.json("/time_filter", {
         method: "POST",
         body: JSON.stringify({
@@ -1099,16 +1106,24 @@ function filteredTimeData(chosenCandidate, metricTimeVar, aggregationTimeVar, da
     })
 }
 
+
+
 // function for updating "Time" graph bars
 function renderTimeRect(timeBands, xScaleTimeBands, timeData, timeTitle, yScaleTimeBands, xTimeLabel, yTimeLabel, metricTimeVar) {
-    // Select current bars and pass in filtered data
+    
+    // Create color variable
+    var myColor = d3.scaleSequential()
+        .interpolator(d3.interpolateInferno)
+        .domain([0, timeBands.length])
+
+        // Select current bars and pass in filtered data
     var rectGroupTime = chartGroupTime.selectAll("rect")
         .data(timeData)
     // Enter any new data, merge/update existing data
         rectGroupTime.enter()
         .append("rect")
         .merge(rectGroupTime)
-        .style("fill", (d, i) => colorBands(i))
+        .style("fill", (d, i) => myColor(i))
         .style("stroke", "black")
         .attr("x", (d, i) => xScaleTimeBands(timeBands[i]))
         .attr("y", d => yScaleTimeBands(d[metricTimeVar]))
@@ -1141,7 +1156,7 @@ function renderTimeRect(timeBands, xScaleTimeBands, timeData, timeTitle, yScaleT
             .text(`Average Number of ${timeMetricLabel}`)
     }
 
-    return rectTimeGroup;
+    return rectGroupTime;
 }
 
 // funciton used for updating y axis scalar
@@ -1169,6 +1184,7 @@ function xTimeBands(timeBands) {
     var xScaleTimeBands = d3.scaleBand()
         .domain(timeBands)
         .range([0, width])
+        .paddingInner([.1]);
 
     return xScaleTimeBands;
 }
@@ -1235,6 +1251,7 @@ function graphTime(data) {
     var xScaleBands = d3.scaleBand()
         .domain(timeBands)
         .range([0, width])
+        .paddingInner([.1])
     // create axis
     var xBandsAxis = d3.axisBottom(xScaleBands);
     var yBandsAxis = d3.axisLeft(yScaleBands);
@@ -1248,6 +1265,11 @@ function graphTime(data) {
         .classed("y-time-axis", true)
         .call(yBandsAxis);
 
+    // Create color variable
+    var myColor = d3.scaleSequential()
+        .interpolator(d3.interpolateInferno)
+        .domain([0, timeBands.length])
+
     // Append bars
     var rectGroupTime = chartGroupTime.selectAll("rect")
         .data(initTime)
@@ -1259,7 +1281,7 @@ function graphTime(data) {
         .attr("height", d => height - yScaleBands(d[metricTimeVar]))
         .classed("timeBands", true)
         .style("stroke", "black")
-        .style("fill", (d, i) => colorBands(i))
+        .style("fill", (d, i) => myColor(i))
 
     rectGroupTime = timeToolTip(rectGroupTime, timeMetricLabel, metricTimeVar)
 
@@ -1596,8 +1618,6 @@ function filteredDistData(candidatesList, distMetricVar, aggregationDistVar, dat
 
         //Generate new Bars
         renderHistRect(histBands, xScaleHistBands, histData, histTitle, yScaleHistBands, xHistLabel, distMetricLabel);
-
-
     })
 }
 
@@ -1634,7 +1654,7 @@ function renderHistRect(histBands, xScaleHistBands, histData, histTitle, yScaleH
     // Update Labels
     histTitle.transition()
         .duration(1000)
-        .text(`Distribution of Log Frequencies: ${distMetricLabel}`);
+        .text(`Distribution of Frequencies (Log Scaled): ${distMetricLabel}`);
 
     xHistLabel.transition()
         .duration(1000)
@@ -1694,7 +1714,6 @@ function renderXHistBandsAxis(xScaleHistBands, xHistBandsAxis) {
 
     return xHistBandsAxis;
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////// Create Initial "Histogram" Graph /////////////////////////
@@ -1779,7 +1798,7 @@ function graphHist(data) {
         .attr("stroke-width", "1.5px")
         .attr("font-family", "Lato")
         .classed("hist-title-label", true)
-        .text(`Distribution of Log Frequencies: ${distMetricLabel}`)
+        .text(`Distribution of Frequencies (Log Scaled): ${distMetricLabel}`)
     // Append x axis label
     chartGroupHist.append("text")
         .attr("transform", `translate(${width / 2}, ${height + 150})`)
@@ -1802,5 +1821,165 @@ function graphHist(data) {
         .attr("stroke-width", "1px")
         .attr("font-family", "Roboto")
         .classed("y-hist-label", true)
-        .text("Log Frequency")
+        .text("Frequency (Log Scaled)")
 }
+
+
+
+///////// Retrieve initial data for displaying graphs on loading page ///////////////////
+// request tweet data from server API endpoint
+
+d3.json("/box_plot_init").then(function(d) {
+    graphBox(d);
+}).catch(function(e) {
+    console.log(e);
+})
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////// Create Initial "Box Plot" Graph /////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+function graphBox(data) {
+    // var boxData = JSON.parse(data);
+    var boxData = data;
+
+    var boxBands = boxData.map(d => d["user_name"]);
+
+    var maxData = boxData.map(d => d["max"]);
+    var minData = boxData.map(d => d["min"]);
+
+    var yScaleLinear = d3.scaleLinear()
+        .domain([d3.min(minData) * 0.95, d3.max(maxData) * 1.05])
+        .range([height, 0]);
+
+    // var maxSelection = d3.max(1, d3.min(minData));
+
+    // var yScaleLog = d3.scaleLog()
+    //     .domain([1, d3.max(maxData)])
+    //     .range([height, 0]);
+    
+    var xScaleBands = d3.scaleBand()
+        .domain(boxBands)
+        .range([0, width])
+        .paddingInner([0.1])
+        .paddingOuter([0.5]);
+
+    // console.log(xScaleBands.bandwidth())
+
+    var bottomAxis = d3.axisBottom(xScaleBands);
+
+    // var leftAxis = d3.axisLeft(yScaleLinear);
+    var leftAxis = d3.axisLeft(yScaleLinear);
+
+
+    chartGroupBox.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .classed("x-box-axis", true)
+        .call(bottomAxis)
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
+
+    chartGroupBox.append("g")
+        .classed("y-box-axis", true)
+        .call(leftAxis)
+
+
+    // Show the main vertical line
+    chartGroupBox.selectAll("vertLines")
+        .data(boxData)
+        .enter()
+        .append("line")
+        .attr("x1", function(d, i){
+            return(xScaleBands(boxBands[i]) + xScaleBands.bandwidth()/2)
+        })
+        .attr("x2", function(d, i){
+            return(xScaleBands(boxBands[i])+ xScaleBands.bandwidth()/2)
+        })
+        .attr("y1", function(d){
+            return(yScaleLinear(d["min"]))
+        })
+        .attr("y2", function(d){
+            return(yScaleLinear(d["max"]))
+        })
+        .attr("stroke", "black")
+        .style("width", 40)
+
+    var rectGroupBox = chartGroupBox.selectAll("boxes")
+        .data(boxData)
+        .enter()
+        .append("rect")
+        .attr("x", function(d,i) {
+            return (xScaleBands(boxBands[i]));
+        })
+        .attr("y", function(d) {
+            return (yScaleLinear(d["q3"]));
+        })
+        .attr("height", function(d) {
+            return (yScaleLinear(d["q1"]) - yScaleLinear(d["q3"]));
+        })
+        .attr("width", xScaleBands.bandwidth())
+        .attr("stroke", "black")
+        .style("fill", "#69b3a2")
+
+    chartGroupBox.selectAll("medianLines")
+        .data(boxData)
+        .enter()
+        .append("line")
+        .attr("x1", function(d, i) {
+            return (xScaleBands(boxBands[i]));
+        })
+        .attr('x2', function(d, i) {
+            return(xScaleBands(boxBands[i]) + xScaleBands.bandwidth());
+        })
+        .attr('y1', function(d) {
+            return (yScaleLinear(d["median"]));
+        })
+        .attr('y2', function(d) {
+            return (yScaleLinear(d["median"]));
+        })
+        .attr("stroke", "black")
+        .style("width", 50);
+
+    // Append title
+    chartGroupBox.append("text")
+        .attr("transform", `translate(${width / 2}, -15)`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "30px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1.5px")
+        .attr("font-family", "Lato")
+        .classed("hist-title-label", true)
+        .text(`Candidate Box Plots (ln transformed): ${distMetricLabel}`)
+    // Append x axis label
+    chartGroupBox.append("text")
+        .attr("transform", `translate(${width / 2}, ${height + 130})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px")
+        .attr("font-family", "Roboto")
+        .classed("x-hist-label", true)
+        .text(`Candidate`)
+    // Append y ais label
+    chartGroupBox.append("text")
+        .attr("transform", `translate(-10, ${height / 2}) rotate(270)`)
+        .attr("text-anchor", "middle")
+        .attr("y", "-50")
+        .attr("font-size", "18px")
+        .attr("fill", "black")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px")
+        .attr("font-family", "Roboto")
+        .classed("y-hist-label", true)
+        .text(`${distMetricLabel} (ln transformed)`)
+
+
+}
+
+
