@@ -492,6 +492,39 @@ def box_plot_init():
 
     return box_json
 
+# Route for displaying top tweets
+@app.route("/tweets_init")
+def tweets_init():
+    # Initiate "tweets" list from current date to 30 days prior
+    today_datetime = dt.datetime.utcnow()
+    today_date = today_datetime.date()
+    thirty_days_ago = dt.date.today() - dt.timedelta(days = 30)
+
+    session = Session(engine)
+
+    # Select first candidate from "candidates_list" for displaying initial tweets
+    tweet_list = []
+    init_user_id = candidates_list[0]["twitter_user_id"]
+    # Create query, initial metric is retweets
+    tweet_query = session.query(Tweets.user_name, Tweets.tweet_id_str).\
+        filter(Tweets.created_at_date >= thirty_days_ago).\
+        filter(Tweets.created_at_date <= today_date).\
+        filter(Tweets.user_id_str == init_user_id).\
+        order_by(Tweets.retweet_count.desc()).limit(10)
+
+    keys = ("user_name", "tweet_id_str")
+
+    for tweet in tweet_query:
+        tweet_dict = dict(zip(keys, tweet))
+        tweet_list.append(tweet_dict)
+
+
+    tweet_json = json.dumps(tweet_list)
+
+    session.close()
+
+    return tweet_json
+
 # Route for sending back filtered data for box plot
 @app.route("/box_plot_filter", methods = ["GET", "POST"])
 def box_plot_filter():
