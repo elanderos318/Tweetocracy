@@ -525,6 +525,64 @@ def tweets_init():
 
     return tweet_json
 
+# Route for sending back filtered data for tweet list
+@app.route("/tweets_filter", methods = ["GET", "POST"])
+def tweets_filter():
+    if request.method == "POST":
+        data = request.data
+        filter_data = [json.loads(data.decode('utf-8'))]
+        #retrieve data variables
+        candidate_id = filter_data[0]["chosenTweetsCandidate"]
+        date_from = filter_data[0]["dateFrom"]
+        date_to = filter_data[0]["dateTo"]
+        metric_var = filter_data[0]["tweetMetricLabel"]
+
+        # convert string dates into DATETIME objects
+        date_from_datetime = dt.datetime.strptime(date_from, "%b %d, %Y")
+        date_to_datetime = dt.datetime.strptime(date_to, "%b %d, %Y")
+        #convert DATETIME objects into DATE objects
+        date_from_date = date_from_datetime.date()
+        date_to_date = date_to_datetime.date()
+
+        session = Session(engine)
+
+        tweet_list = []
+
+        if metric_var == "Retweets":
+            # Create query
+            tweet_query = session.query(Tweets.user_name, Tweets.tweet_id_str).\
+                filter(Tweets.created_at_date >= date_from_date).\
+                filter(Tweets.created_at_date <= date_to_date).\
+                filter(Tweets.user_id_str == candidate_id).\
+                order_by(Tweets.retweet_count.desc()).limit(10)
+
+            keys = ("user_name", "tweet_id_str")
+
+            for tweet in tweet_query:
+                tweet_dict = dict(zip(keys, tweet))
+                tweet_list.append(tweet_dict)
+        else:
+            # Create query
+            tweet_query = session.query(Tweets.user_name, Tweets.tweet_id_str).\
+                filter(Tweets.created_at_date >= date_from_date).\
+                filter(Tweets.created_at_date <= date_to_date).\
+                filter(Tweets.user_id_str == candidate_id).\
+                order_by(Tweets.favorite_count.desc()).limit(10)
+
+            keys = ("user_name", "tweet_id_str")
+
+            for tweet in tweet_query:
+                tweet_dict = dict(zip(keys, tweet))
+                tweet_list.append(tweet_dict)
+
+
+        tweet_json = json.dumps(tweet_list)
+
+        session.close()
+
+        return tweet_json
+        
+
 # Route for sending back filtered data for box plot
 @app.route("/box_plot_filter", methods = ["GET", "POST"])
 def box_plot_filter():

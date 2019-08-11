@@ -2280,8 +2280,92 @@ candidateTweetsButtons.on("change", function(d) {
 })
 
 function submitTweetsClick() {
-    console.log("Hi")
+    // Prevent the page from refreshing
+    d3.event.preventDefault();
+
+
+    /////////////////////////////////////////////
+
+    // Check Retweet/Favorite Selection
+
+    if (retweetRadioTweets.property("checked")) {
+        tweetMetricLabel = "Retweets";
+    } else {
+        tweetMetricLabel = "Favorites";
+    }
+    ////////////////////////////////////////////////////////
+
+    // Check Date Range Selected
+
+    var dateFromTweets;
+    var dateToTweets;
+    dateFromTweets = dateFromSelectionTweets.property("value");
+    dateToTweets = dateToSelectionTweets.property("value");
+
+    // Create time formatter
+    var formatTime = d3.timeFormat("%b %d, %Y");
+    //// Default Dates will be set to the current date to a month ago if nothing is selected
+    var currentDate = new Date();
+    var monthAgo = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()); 
+
+    if (!dateFromTweets) {
+        dateFromTweets = formatTime(monthAgo);
+    }
+    if (!dateToTweets) {
+        dateToTweets = formatTime(currentDate);
+        }
+
+    filteredTweetsData(chosenTweetsCandidate, tweetMetricLabel, dateFromTweets, dateToTweets);
 }
+
+// Function for sending data with "POST" and retrieving new Tweet list
+function filteredTweetsData(chosenTweetsCandidate, tweetMetricLabel, dateFromTweets, dateToTweets) {
+    //// Send a POST request to the backend to filter data for "Tweets" list
+    d3.json("/tweets_filter", {
+        method: "POST",
+        body: JSON.stringify({
+            chosenTweetsCandidate: chosenTweetsCandidate,
+            dateFrom: dateFromTweets,
+            dateTo: dateToTweets,
+            tweetMetricLabel: tweetMetricLabel
+        }),
+        headers: {
+            "Content-type": "application/json; charset-UTF-i"
+        }
+    }).then(json => {
+        var tweetData = json;
+
+        var candidateName = tweetData[0]["user_name"];
+
+        var tweetIds = tweetData.map(d => d["tweet_id_str"])
+
+        var tweetTitleText = d3.select(".tweet-title");
+
+        tweetTitleText.transition()
+            .duration(1000)
+            .text(`Top Tweets (${tweetMetricLabel}): ${candidateName}`);
+
+        
+        d3.selectAll("twitter-widget").remove()
+
+        for (var i = 0; i < tweetIds.length; i++) {
+
+            twttr.widgets.createTweet(
+                tweetIds[i],
+                document.getElementById('tweet-list'),
+                {
+                align: 'center',
+                width: 500
+                })
+                .then(function (el) {
+                console.log("Tweet displayed.")
+                });
+            }
+
+    })
+
+}
+
 
 
 // Function for displaying Initial tweet list
