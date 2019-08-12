@@ -81,10 +81,10 @@
 
   <div class = "divider"></div>
 
-    <div class = "row section valign-wrapper aag-container">
+    <div class = "row section aag-container">
 
 
-      <div class = "col m3 filter-bar">
+      <div class = "col s3 filter-bar">
 
         <div class = "card action-panel">
 
@@ -416,14 +416,100 @@
       </div> <!--col m3-->
 
       <!--div column for graph-->
-      <div class = "col m9">
+      <div class = "col s6">
         <div class = "at-a-glance-graph"></div>
         <div class = "moving-average-graph"></div>
       </div>
 
+
+
+      <!--Helper Card Section-->
+
+      <div class = "col s3">
+
+          <div class="card helper-panel">
+
+            <div class="card-content white-text">
+              <span class="card-title">At A Glance</span>
+            </div>
+            <div class="card-action helper-sub-panel">
+              <P>The first graph compares engagement values (number of retweets
+                 or favorites) per tweet across multiple candidates.</P>
+              <p>Notes:</p>
+
+
+              <ul class = "browser-default">
+
+                <li>These are interactive graphs! Feel free to filter the graph data
+                  by using the filter controls on the left panels.
+                  One of the main reasons for developing the app this way to to 
+                  provide the user with as much control as possible over the 
+                  data visualization. Try out filtering the data based on relevant
+                  dates provided in <a class = "wiki-link" target = "_blank" href="https://en.wikipedia.org/wiki/Timeline_of_the_2020_United_States_presidential_election">
+                  this Wikipedia event timeline of the 2020 elections.</a>
+                </li>
+
+                <li>On initialization, data is displayed using tweets from 
+                  a month prior to the current date. This general rule is true 
+                  for all graphs/lists displayed on initialization.
+                </li>
+                <li>Tweet publish time data is based on UTC. Therefore the app 
+                  uses a UTC time basis for filtering tweets. Again, this rule
+                  is generally applied for all graphs on initialization.
+                </li>
+
+
+                
+              </ul>
+            </div>
+
+          </div> <!--card helper-panel-->
+
+          <br>
+
+
+          <div class="card helper-panel">
+
+            <div class="card-content white-text">
+              <span class="card-title">Moving Averages</span>
+            </div>
+            <div class="card-action helper-sub-panel">
+              <P>The second graph attempts to visualize change in data across
+                time using moving averages. Similarly to our first viz, this graph
+                tries to give a sense of the differences in engagement across
+                different candidates.
+              </P>
+              <p>Notes:</p>
+
+              <ul class = "browser-default">
+                <li>The "moving average" metric is arrived at by taking each date,
+                  collecting all tweets for that candidate up to nine days prior 
+                  (inclusive), and averaging the data. Thus the consistency for
+                  eadh data point lies in the time range, not the number of tweets.
+                </li>
+                
+              </ul>
+            </div>
+
+          </div> <!--card helper-panel-->
+
+
+      </div> <!-- ""col s3"-->
+
     </div><!--row section valign-wrapper aag-container-->
 
     <div class = "divider"></div> 
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
 
 
     <div class = "row section valign-wrapper time-container">

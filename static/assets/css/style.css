@@ -67,9 +67,22 @@ font-weight: 400;
     background-color: #99c9f5 !important;
 }
 
+.helper-panel {
+    background-color:  rgba(0, 38, 255, 0.705);
+}
+
+.helper-sub-panel {
+    background-color: #f1f4df !important;
+}
+
 .input-text {
     color: black;
 
+}
+
+.wiki-link {
+    text-transform: none !important;
+    color: rgba(0, 38, 255, 0.705) !important;
 }
 
 /* Graph CSS */
