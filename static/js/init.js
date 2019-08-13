@@ -8,9 +8,9 @@
 
 
 // Initialization for sliding photos
-$(document).ready(function(){
-  $('.slider').slider();
-});
+// $(document).ready(function(){
+//   $('.slider').slider();
+// });
      
 // Init for Date Picker
 
