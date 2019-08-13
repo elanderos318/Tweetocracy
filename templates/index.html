@@ -455,7 +455,7 @@
                 </li>
                 <li>Tweet publish time data is based on UTC. Therefore the app 
                   uses a UTC time basis for filtering tweets. Again, this rule
-                  is generally applied for all graphs on initialization.
+                  is applied for all graphs on initialization.
                 </li>
 
 
@@ -898,17 +898,73 @@
       </div> <!--col m3-->
 
       <!--div column for graph-->
-      <div class = "col m9">
+      <div class = "col s6">
         <div class = "time-graph"></div>
       </div>
 
+      
+      <!--Helper Card Section-->
+
+      <div class = "col s3">
+
+          <div class="card helper-panel">
+
+            <div class="card-content white-text">
+              <span class="card-title">Day & Time</span>
+            </div>
+            <div class="card-action helper-sub-panel">
+              <P>As opposed to the first couple of graphs, the "Day & Time" graph
+                presents data on each individual candidate's engagement metrics rather 
+                than comparing candidates to each other. Here users may try to see
+                whether metrics differ across hours of the day in which tweets were
+                published or even across days of the week.
+              </P>
+              <p>Notes:</p>
+
+
+              <ul class = "browser-default">
+
+                <li>Another metric, "Count", was added for this visualization in addition
+                  to "Retweets" and "Favorites". Count measures the <strong>total</strong> number of tweets
+                  the account published for that hour or day of the week for the date
+                  range provided, whereas Retweets/Favorites measure the <strong>average</strong> engagement metric 
+                  received from twitter users for those categories.
+                </li>
+
+              </ul>
+            </div>
+
+          </div> <!--card helper-panel-->
+
+
+      </div> <!-- ""col s3"-->
+
+
     </div> <!--row section valign-wrapper hourly-weekly-container-->
+
+<!-- /////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////// -->
 
 
   <div class = "divider"></div>
 
 
-  <div class = "row section valign-wrapper dist-container">
+  <div class = "row section dist-container">
 
 
     <div class = "col m3 filter-bar">
@@ -1243,10 +1299,94 @@
     </div> <!--col m3-->
 
     <!--div column for graph-->
-    <div class = "col m9">
+    <div class = "col s6">
       <div class = "histogram-graph"></div>
       <div class = "box-plot-graph"></div>
     </div>
+
+
+
+    <!--Helper Card Section-->
+
+    <div class = "col s3">
+
+      <div class="card helper-panel">
+
+        <div class="card-content white-text">
+          <span class="card-title">Histogram</span>
+        </div>
+        <div class="card-action helper-sub-panel">
+          <P>While single-metric data points such as "average" are very presentable,
+            it's impossible to know the full story of the data using just this 
+            piece of information. A histogram is able to show the full shape of 
+            the data distribution in a much more telling manner. This graph collects all
+            the tweets for the selected filters without differentiating for candidates and
+            displays how <strong>often</strong> tweets receive certain metrics.
+          </P>
+          <p>Notes:</p>
+
+
+          <ul class = "browser-default">
+
+            <li>As it turns out, tweet data is heavily skewed, so much so that a 
+              log scalar was used to make the data more presentable. That is, tweets
+              usually receive metrics along the lower ranges of values is 
+              initially observed.
+            </li>
+
+          </ul>
+        </div>
+
+      </div> <!--card helper-panel-->
+
+
+
+      <div class="card helper-panel">
+
+        <div class="card-content white-text">
+          <span class="card-title">Box Plot</span>
+        </div>
+        <div class="card-action helper-sub-panel">
+          <P>The box plot achieves the same kind of goal as the histogram, displaying
+            the distribution of data, but here we can compare distributions across
+            candidates as an individual box plot is displayed per candidate.
+          </P>
+          <p>Notes:</p>
+
+
+          <ul class = "browser-default">
+
+            <li>A methodological difference here from the histogram is that the data was log-transformed rather
+              than log-scaled; values were transformed, and then the min, Q1, median, 
+              Q3, and max were used for displaying the data along a linear scale.
+            </li>
+
+            <li>While we learned that tweet data frequents the lower-end of metric values,
+              the box plot is useful in showing how often a candidate's tweets reach the
+              'extreme' higher end of metric values compared to others.
+            </li>
+
+          </ul>
+        </div>
+
+      </div> <!--card helper-panel-->
+
+
+  </div> <!-- ""col s3"-->
+
+  <!-- //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////// -->
 
   </div> <!--row section valign-wrapper dist-container-->
 
@@ -1552,12 +1692,45 @@
         </div> <!--col m3-->
   
         <!--div column for graph-->
-        <div class = "section col m9">
+        <div class = "section col s6">
 
           <div id = "tweet-title"></div>
            <div id = "tweet-list"></div>
 
         </div>
+
+
+          <!--Helper Card Section-->
+
+    <div class = "col s3">
+
+        <div class="card helper-panel">
+  
+          <div class="card-content white-text">
+            <span class="card-title">Top Tweets</span>
+          </div>
+          <div class="card-action helper-sub-panel">
+            <P>A simpler display of information, top tweets help us see
+              what "kind" of tweets receive top attention for each candidate rather
+              than just raw numbers. 
+            </P>
+            <p>Notes:</p>
+  
+  
+            <ul class = "browser-default">
+  
+              <li>"Simple" is used perhaps incorrectly as semantic content
+                 provides much richer information about a tweet than a raw
+                 numerical value. 
+              </li>
+  
+            </ul>
+          </div>
+  
+        </div> <!--card helper-panel-->
+  
+  
+    </div> <!-- ""col s3"-->
   
       </div> <!--row section valign-wrapper tweets-container-->
 
