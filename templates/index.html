@@ -16,13 +16,13 @@
 </head>
 <body>
   <nav class="blue darken-4" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Tweetocracy!</a>
+    <div class="nav-wrapper container"><a id="logo-container" href="{{ url_for('index') }}" class="brand-logo">Tweetocracy!</a>
       <ul class="right hide-on-med-and-down">
-        <li><a href="#">Navbar Link</a></li>
+        <li><a href="{{ url_for('machine_learning') }}" class = "machine-learning-link">Machine Learning</a></li>
       </ul>
 
       <ul id="nav-mobile" class="sidenav">
-        <li><a href="#">Navbar Link</a></li>
+        <li><a href="{{ url_for('machine_learning') }}">Machine Learning</a></li>
       </ul>
       <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
     </div>
@@ -35,11 +35,21 @@
       <h3 class="header blue-text context-header">Context</h3>
       <div class = "divider"></div>
       <div class="row center">
-        <h5 class="header header-description col l12 light">Over the past years, social media has had an increasing influence over American politics and elections. Social media allows candidates to bypass the traditional gatekeepers of mainstream media companies by talking directly to users. Attention-grabbing tactics, heated rhetoric, breaking scandals, etc. have made millions of impressions on users on social media - as the 2020 presidential elections approaches, there is no longer any doubt in the minds of candidates and campaign staffers of the necessity of establishing a strong and impactful presence online.</h5>
+        <h5 class="header header-description col l12 light">Over the past years, social media has had an increasing influence over American politics 
+          and elections. Social media allows candidates to bypass the traditional gatekeepers of mainstream media companies by talking directly to users. 
+          Attention-grabbing tactics, heated rhetoric, breaking scandals, etc. have made millions of impressions on users on social media - 
+          as the 2020 presidential elections approaches, there is no longer any doubt in the minds of candidates and campaign staffers of the necessity of establishing a strong and impactful presence online.</h5>
+
+          <br>
+          <h5 class="header header-description col l12 light">This project examines the Twitter accounts of all presidential candidates. On the home page you will see interactive
+            visualizations with different purposes and metrics. On the "Machine Learning" page, a deep learning model has been trained
+            on tens of thousands of tweets from the candidates, with the end goal of trying to predict which user published a tweet by
+            examining its contents.
+          </h5>
       </div>
 
 
-      <button class = "twitter-button"></button>
+      <!-- <button class = "twitter-button"></button> -->
       
       <br><br>
 

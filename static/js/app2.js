@@ -36,7 +36,7 @@ datePicker = d3.select(".datepicker");
 //////// All Charts will use the below sizes ////////////////////
 // Set SVG Chart Formatting
 var svgHeight = 700;
-var svgWidth = 950;
+var svgWidth = 900;
 
 var margin = {
   top: 60,
