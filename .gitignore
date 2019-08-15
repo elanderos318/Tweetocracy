@@ -111,3 +111,6 @@ node_modules/
 
 # config.py
 config.py
+
+# ML model
+candidate_classifier.h5
