@@ -111,6 +111,13 @@ node_modules/
 
 # config.py
 config.py
+<<<<<<< HEAD
 
+<<<<<<< HEAD
 # ML model
+=======
+#ML Model
+>>>>>>> d278f34... Testing lfs/model file size
 candidate_classifier.h5
+=======
+>>>>>>> a661593... lfs testing

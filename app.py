@@ -21,6 +21,22 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 
+from keras.models import load_model
+from keras import backend as K
+
+from sklearn.feature_extraction.text import CountVectorizer
+from scipy.sparse import csr_matrix
+from sklearn.externals import joblib
+from sklearn.preprocessing import LabelEncoder
+
+import random
+
+import pickle
+
+import nltk
+import re
+import string
+
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 
 from Candidates import candidates_list
@@ -204,6 +220,137 @@ def index():
 @app.route("/machine_learning")
 def machine_learning():
     return render_template('machine_learning.html')
+
+# Function for filtering out tweets which are newer than two days (Gives the tweet stats time to mature)
+def filter_aged(list_element):
+    date_string = list_element["created_at"]
+    datetime_object = dt.datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+    date_object = datetime_object.date()
+    
+    today_datetime = dt.datetime.utcnow()
+    today_date = today_datetime.date()
+    two_days_prior = today_date - dt.timedelta(days = 2)
+    
+    return date_object < two_days_prior
+
+# Functions for returning day, hour, month values from a datetime string
+def convert_day(date_string):
+    datetime_object = dt.datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+    day = dt.datetime.strftime(datetime_object, "%A")
+    return day
+def convert_hour(date_string):
+    datetime_object = dt.datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+    hour = dt.datetime.strftime(datetime_object, "%H")
+    return hour
+def convert_month(date_string):
+    datetime_object = dt.datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+    month = dt.datetime.strftime(datetime_object, "%B")
+    return month
+    
+
+stopwords = nltk.corpus.stopwords.words('english')
+wn = nltk.WordNetLemmatizer()
+
+# Funciton for processing text data (remove punctuation, tokenization, lemmatization)
+def clean_text(text):
+    text = "".join([word.lower() for word in text if word not in string.punctuation])
+    tokens = re.split('\W+', text)
+    text = [wn.lemmatize(word) for word in tokens if word not in stopwords]
+    return text
+
+@app.route("/machine_learning_tweet")
+def machine_learning_tweet():
+
+    # today_datetime = dt.datetime.utcnow()
+    # today_date = today_datetime.date()
+    # two_days_prior = dt.date.today() - dt.timedelta(days = 2)
+
+    random_candidate = random.choice(candidates_list)
+    candidate_id = random_candidate["twitter_user_id"]
+
+    user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&count=100', params = extended_payload, auth = auth)
+    user_json = user_get.json()
+    user_filtered = list(filter(lambda x: filter_aged(x), user_json))
+
+    tweet_selection = random.choice(user_filtered)
+    tweet_dict = {
+        'full_text': tweet_selection["full_text"],
+        'retweet_count': tweet_selection["retweet_count"],
+        'favorite_count': tweet_selection['favorite_count'],
+        'created_at': tweet_selection['created_at']
+    }
+    tweet_dict['day'] = convert_day(tweet_dict['created_at'])
+    tweet_dict['hour'] = convert_hour(tweet_dict['created_at'])
+    tweet_dict['month']  = convert_month(tweet_dict['created_at'])
+
+    tweet_list = [tweet_dict]
+    tweet_df = pd.DataFrame(tweet_list)
+
+    # NGramVectorizer
+    ngram_vect = CountVectorizer(ngram_range=(2,2), analyzer=clean_text)
+    ngram_vect.fit_transform(tweet_df['full_text'])
+
+
+    __location__ = os.path.dirname(os.path.realpath(__file__))
+    print(__location__)
+
+    config_dir = os.path.join(__location__, "config")
+    print(config_dir)
+
+    print(os.getcwd())
+
+    # retrieve column names from trained model
+    with open('jupyter_notebook_code/columns.pkl', 'rb') as f:
+        columns_list = pickle.load(f)
+        
+    null_list = []
+    for i in range(0, len(columns_list)):
+        null_list.append(0)
+
+    X_features = dict(zip(columns_list, null_list))
+
+    X_features['retweet_count'] = tweet_dict['retweet_count']
+    X_features['favorite_count'] = tweet_dict['favorite_count']
+
+    select_month = tweet_dict['month']
+    select_day = tweet_dict['day']
+    select_hour = tweet_dict['hour']
+    X_features[f'month_{select_month}'] = 1
+    X_features[f'day_{select_day}'] = 1
+    X_features[f'hour_{select_hour}'] = 1
+
+    for word in ngram_vect.get_feature_names():
+        if word in X_features.keys():
+            X_features[word] += 1
+
+    X_features = np.array(list(X_features.values())).reshape((1, 58604))
+
+    X_sparse = csr_matrix(X_features)
+
+    scaler_filename = "jupyter_notebook_code/mas_scaler.save"
+    scaler = joblib.load(scaler_filename) 
+
+    X_scaled = scaler.transform(X_sparse)
+
+    encoder = LabelEncoder()
+    encoder.classes_ = np.load('jupyter_notebook_code/classes.npy')
+
+    model = load_model("jupyter_notebook_code/candidate_classifier.h5")
+
+    # K.clear_session()
+
+    prediction_prob = model.predict_proba(X_scaled)
+    prediction_prob = [float(i) for i in prediction_prob[0]]
+    classes_prob = list(zip(prediction_prob, encoder.classes_))
+    sorted_class = sorted(classes_prob, key = lambda x: x[0], reverse = True)
+    sorted_top = sorted_class[0:2]
+
+    sorted_json = json.dumps(sorted_top)
+
+    K.clear_session()
+
+    return sorted_json
+
 
 # Route for initializing "At a Glance" graph
 @app.route('/aag_init')
