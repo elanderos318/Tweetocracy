@@ -333,7 +333,7 @@ def machine_learning_tweet():
     X_scaled = scaler.transform(X_sparse)
 
     encoder = LabelEncoder()
-    encoder.classes_ = np.load('jupyter_notebook_code/classes.npy')
+    encoder.classes_ = np.load('jupyter_notebook_code/classes.npy', allow_pickle = True)
 
     model = load_model("jupyter_notebook_code/candidate_classifier.h5")
 
