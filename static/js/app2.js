@@ -2279,6 +2279,8 @@ candidateTweetsButtons.on("change", function(d) {
     chosenTweetsCandidate = this.value;
 })
 
+
+
 function submitTweetsClick() {
     // Prevent the page from refreshing
     d3.event.preventDefault();
@@ -2432,14 +2434,102 @@ function tweetsDisplay(data) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
+var textField = d3.select("#random-tweet-text");
+var retweetField = d3.select("#random-tweet-retweets");
+var favoriteField = d3.select("#random-tweet-favorites");
+var createdField = d3.select("#random-tweet-created");
 
+var userGuess = d3.select("#user-guess");
+
+var modelTopText = d3.select("#model-top-prediction");
+var modelSecondText = d3.select("#model-second-prediction");
+
+var modelTopName;
+var modelSecondName;
+var modelTopProb;
+var modelSecondProb;
+
+var trueAnswer;
+var trueAnswerText = d3.select("#true-answer");
+
+var revealSubmit = d3.select(".prediction-selection-submit");
+
+var selectedCandidate = "Joe Biden";
+var userChoices = d3.selectAll('.machine-learning-choice');
+userChoices.on("change", function(d) {
+    // var candidate = this.select("span").text();
+    selectedCandidate = d3.select(this).select("span").text();
+    console.log(selectedCandidate);
+    userGuess.text(selectedCandidate);
+})
+
+var selectedId = "939091";
+var radioSelections = d3.selectAll(".machine-learning-input-radio");
+radioSelections.on("change", function(d) {
+    selectedId = this.value;
+    console.log(selectedId);
+})
+
+
+revealSubmit.on("click", revealAnswer);
+
+function revealAnswer() {
+    modelTopText.text(`${modelTopName} - Probability: ${modelTopProb}`)
+
+    modelSecondText.text(`${modelSecondName} - Probability: ${modelSecondProb}`)
+
+    trueAnswerText.text(`${trueAnswer}`)
+}
+
+var newTweetButton = d3.select(".reset-selection-submit");
+
+newTweetButton.on("click", resetTweet);
+
+function resetTweet() {
+
+    modelTopText.text("");
+    modelSecondText.text("");
+    trueAnswerText.text("");
+
+    d3.json("/machine_learning_tweet").then(function(d) {
+
+        randomTweet(d);
+    
+    }).catch(function(e) {
+        console.log(e);
+    })
+}
 
 // Initialize random tweet
 d3.json("/machine_learning_tweet").then(function(d) {
-    console.log(d);    
+
+    randomTweet(d);
+
 }).catch(function(e) {
     console.log(e);
 })
 
+function randomTweet(data) {
 
+    console.log(data);
+
+    d3.selectAll(".random-field").text("");
+
+    textField.text(data['full_text']);
+
+    retweetField.text(data["retweet_count"].toString());
+
+    favoriteField.text(data["favorite_count"].toString());
+
+    createdField.text(data["created_at"]);
+
+    modelTopName = data["predictions"][0][1];
+    modelTopProb = data['predictions'][0][0]
+
+    modelSecondName = data['predictions'][1][1];
+    modelSecondProb = data['predictions'][1][0];
+
+    trueAnswer = data['user_name'];
+
+}
 

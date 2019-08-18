@@ -230,8 +230,12 @@ def filter_aged(list_element):
     today_datetime = dt.datetime.utcnow()
     today_date = today_datetime.date()
     two_days_prior = today_date - dt.timedelta(days = 2)
+
+    training_data = dt.date(2019, 8, 14)
     
-    return date_object < two_days_prior
+    # return ((date_object <= two_days_prior) and (date_object > training_data)) 
+
+    return date_object > training_data
 
 # Functions for returning day, hour, month values from a datetime string
 def convert_day(date_string):
@@ -261,10 +265,6 @@ def clean_text(text):
 @app.route("/machine_learning_tweet")
 def machine_learning_tweet():
 
-    # today_datetime = dt.datetime.utcnow()
-    # today_date = today_datetime.date()
-    # two_days_prior = dt.date.today() - dt.timedelta(days = 2)
-
     random_candidate = random.choice(candidates_list)
     candidate_id = random_candidate["twitter_user_id"]
 
@@ -277,7 +277,9 @@ def machine_learning_tweet():
         'full_text': tweet_selection["full_text"],
         'retweet_count': tweet_selection["retweet_count"],
         'favorite_count': tweet_selection['favorite_count'],
-        'created_at': tweet_selection['created_at']
+        'created_at': tweet_selection['created_at'],
+        'user_name': tweet_selection['user']['name'],
+        'user_id_str': tweet_selection['user']['id_str']
     }
     tweet_dict['day'] = convert_day(tweet_dict['created_at'])
     tweet_dict['hour'] = convert_hour(tweet_dict['created_at'])
@@ -345,11 +347,16 @@ def machine_learning_tweet():
     sorted_class = sorted(classes_prob, key = lambda x: x[0], reverse = True)
     sorted_top = sorted_class[0:2]
 
-    sorted_json = json.dumps(sorted_top)
+    tweet_dict['full_text'] = tweet_dict['full_text'].replace('&amp;', '&')
+    tweet_dict['full_text'] = tweet_dict['full_text'].replace('\n', ' ')
+
+    tweet_dict['predictions'] = sorted_top
+
+    # sorted_json = json.dumps(sorted_top)
 
     K.clear_session()
 
-    return sorted_json
+    return (jsonify(**tweet_dict))
 
 
 # Route for initializing "At a Glance" graph
@@ -376,7 +383,7 @@ def aag_init():
 
     response_json = json.dumps(graph_data_list)
 
-    print(response_json)
+    # print(response_json)
 
     session.close()
 
@@ -410,7 +417,7 @@ def moving_average_init():
         moving_average_dict = dict(zip(keys, list_query))
         moving_average_list.append(moving_average_dict)
 
-    print(moving_average_list)
+    # print(moving_average_list)
 
     session.close()
 
@@ -1316,7 +1323,7 @@ def moving_average_filter():
         moving_average_dict = dict(zip(keys, list_query))
         moving_average_list.append(moving_average_dict)
 
-    print(moving_average_list)
+    # print(moving_average_list)
 
     session.close()
 
