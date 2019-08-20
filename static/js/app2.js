@@ -2459,7 +2459,6 @@ var userChoices = d3.selectAll('.machine-learning-choice');
 userChoices.on("change", function(d) {
     // var candidate = this.select("span").text();
     selectedCandidate = d3.select(this).select("span").text();
-    console.log(selectedCandidate);
     userGuess.text(selectedCandidate);
 })
 
@@ -2467,7 +2466,6 @@ var selectedId = "939091";
 var radioSelections = d3.selectAll(".machine-learning-input-radio");
 radioSelections.on("change", function(d) {
     selectedId = this.value;
-    console.log(selectedId);
 })
 
 
