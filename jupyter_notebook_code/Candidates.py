@@ -155,7 +155,7 @@ candidates_list = [
         "status": "running"
     },
     {
-        "name": "Donald Trump",
+        "name": "Donald J. Trump",
         "party": "Republican",
         "twitter_url": "https://twitter.com/realDonaldTrump",
         "twitter_screen_name": "realDonaldTrump",

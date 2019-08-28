@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <meta charset="ut-8">
+  <title>Tweetocracy</title>
+
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="../static/assets/css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="../static/assets/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+
+</head>
+<body>
+  <nav class="blue darken-4" role="navigation">
+    <div class="nav-wrapper container"><a id="logo-container" href="{{ url_for('index') }}" class="brand-logo">Tweetocracy!</a>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="{{ url_for('machine_learning') }}" class = "machine-learning-link">Machine Learning</a></li>
+      </ul>
+
+      <ul id="nav-mobile" class="sidenav">
+        <li><a href="{{ url_for('machine_learning') }}">Machine Learning</a></li>
+      </ul>
+      <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+    </div>
+  </nav>
+
+
+
+  <div class = "row section machine-learning-container">
+
+
+        <div class = "col m3 filter-bar">
+  
+          <div class = "card action-panel">
+  
+            <div class = "card-content white-text">
+              <span class = "card-title">Choose Candidate:</span>
+            </div>
+            
+            <div class = "card-action action-sub-panel">
+  
+              <form>
+  
+                <div class = "row">
+  
+                  <!--First Candidate Column-->
+                  <div class = "col m6">
+  
+                    <p>
+                      <label for = "machine-learning-joe-biden-radio" class = "machine-learning-choice">
+                        <input class = "machine-learning-input-radio" value = "939091" id = "machine-learning-joe-biden-radio" name = "machine-learning-radio" type= 'radio' checked/>
+                        <span class = "user-guess input-text">Joe Biden</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                      <label for = "machine-learning-cory-booker-radio" class = "machine-learning-choice">
+                          <input class = "machine-learning-input-radio" value = "15808765" id = "machine-learning-cory-booker-radio" name = "machine-learning-radio" type= 'radio'/>
+                          <span class = "user-guess input-text">Cory Booker</span>
+                    </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-pete-buttigieg-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "226222147" id = "machine-learning-pete-buttigieg-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Pete Buttigieg</span>
+                      </label>
+                    </p>
+                    
+                    <p>
+                        <label for = "machine-learning-kirsten-gillibrand-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "72198806" id = "machine-learning-kirsten-gillibrand-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Kirsten Gillibrand</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-mike-gravel-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "14709326" id = "machine-learning-mike-gravel-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Mike Gravel</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-kamala-harris-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "30354991" id = "machine-learning-kamala-harris-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Kamala Harris</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-john-hickenlooper-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "117839957" id = "machine-learning-john-hickenlooper-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">John Hickenlooper</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-bernie-sanders-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "216776631" id = "machine-learning-bernie-sanders-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Bernie Sanders</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-donald-trump-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "25073877" id = "machine-learning-donald-trump-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Donald Trump</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-elizabeth-warren-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "357606935" id = "machine-learning-elizabeth-warren-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Elizabeth Warren</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-bill-weld-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "734783792502575105" id = "machine-learning-bill-weld-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Bill Weld</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-marianne-williamson-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "21522338" id = "machine-learning-marianne-williamson-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Marianne Williamson</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-andrew-yang-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "2228878592" id = "machine-learning-andrew-yang-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Andrew Yang</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-tom-steyer-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "949934436" id = "machine-learning-tom-steyer-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Tom Steyer</span>
+                      </label>
+                    </p>
+  
+                  </div>
+                  
+                  <!-- Second Candidate Column -->
+                  <div class = "col m6">
+  
+                    <p>
+                        <label for = "machine-learning-julian-castro-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "19682187" id = "machine-learning-julian-castro-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Julián Castro</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-john-delaney-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "426028646" id = "machine-learning-john-delaney-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">John Delaney</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-tulsi-gabbard-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "26637348" id = "machine-learning-tulsi-gabbard-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Tulsi Gabbard</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-jay-inslee-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "21789463" id = "machine-learning-jay-inslee-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Jay Inslee</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-amy-klobuchar-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "33537967" id = "machine-learning-amy-klobuchar-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Amy Klobuchar</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-wayne-messam-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "33954145" id = "machine-learning-wayne-messam-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Wayne Messam</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-seth-moulton-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "248495200" id = "machine-learning-seth-moulton-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Seth Moulton</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-beto-rourke-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "342863309" id = "machine-learning-beto-rourke-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Beto O'Rourke</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-tim-ryan-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "466532637" id = "machine-learning-tim-ryan-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Tim Ryan</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-eric-swalwell-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "942156122" id = "machine-learning-eric-swalwell-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Eric Swalwell</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-michael-bennet-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "45645232" id = "machine-learning-michael-bennet-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Michael Bennet</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-steve-bullock-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "111721601" id = "machine-learning-steve-bullock-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Steve Bullock</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-bill-blasio-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "476193064" id = "machine-learning-bill-blasio-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Bill de Blasio</span>
+                      </label>
+                    </p>
+  
+                    <p>
+                        <label for = "machine-learning-joe-sestak-radio" class = "machine-learning-choice">
+                            <input class = "machine-learning-input-radio" value = "46764631" id = "machine-learning-joe-sestak-radio" name = "machine-learning-radio" type= 'radio'/>
+                            <span class = "user-guess input-text">Joe Sestak</span>
+                      </label>
+                    </p>
+  
+                  </div>
+  
+                </div>
+  
+  
+              </form>
+  
+  
+            </div> <!--card-action action-sub-panel-->
+            
+            
+  
+            <div class = "card-content">
+                <button class="btn waves-effect waves-light prediction-selection-submit" type="submit" name="action">Submit Answer
+                    <i class="material-icons right">send</i>
+                </button>
+
+                <br>
+                <br>
+
+                <button class="btn waves-effect waves-light reset-selection-submit" type="submit" name="action">New Tweet
+                    <i class="material-icons right">send</i>
+                </button>
+            </div>
+  
+  
+          </div> <!--card action-panel-->
+  
+        </div> <!--col m3-->
+  
+        <!--div column for graph-->
+        <div class = "col s6">
+          <!-- <div class = "machine-learning-tweet"></div> -->
+
+          <div class="section no-pad-bot">
+            <div class = "container">
+              <br><br>
+              <h4 class="header black-text context-header">Tweet Info</h3>
+              <div class="row">
+                <p class="header header-description light"><u>Text</u></p>
+                <p id = "random-tweet-text" class = 'random-field'></p>
+
+                <p class="header header-description light"><u>Retweets</u></p>
+                <p id = "random-tweet-retweets" class = 'random-field'></p>
+
+                <p class="header header-description light"><u>Favorites</u></p>
+                <p id = "random-tweet-favorites" class = 'random-field'></p>
+                
+                <p class="header header-description light"><u>Created at</u></p>
+                <p id = "random-tweet-created" class = 'random-field'></p>
+
+
+              </div>
+
+              <div class = "divider"></div>
+
+              <h5 class = "header black-text context-header">Your Guess</h4>
+              <div class = "row">
+                <p id = "user-guess"></p>
+              </div>
+
+
+              <div class = "divider"></div>
+
+              <h5 class = "header black-text context-header">Deep Learning Model Predictions</h4>
+              <div class = "row">
+                <p class="header header-description light"><u>Top Prediction</u></p>
+                <p id = "model-top-prediction"></p>
+
+                <p class="header header-description light"><u>Second Prediction</u></p>
+                <p id = "model-second-prediction"></p>
+
+              </div>
+
+              <div class = "divider"></div>
+
+              <h5 class = "header black-text context-header">True Answer</h4>
+              <div class = "row">
+                <p id = "true-answer"></p>
+              </div>
+
+                      
+              <br><br>
+        
+            </div>
+          </div>
+        </div>
+  
+        
+        <!--Helper Card Section-->
+  
+        <div class = "col s3">
+  
+            <div class="card helper-panel">
+  
+              <div class="card-content white-text">
+                <span class="card-title">A Classification Model</span>
+              </div>
+              <div class="card-action helper-sub-panel">
+                <P>This model has been trained on ~40,000 tweets from candidates taking into account
+                  features such as number of retweets, number of favorites, month, day, and hour published
+                  as well as text information, with the goal of being able to predict which user 
+                  published a given tweet based on this information.
+
+                  With 28 candidates running, a random selection has a ~<strong>3.6%</strong> chance of 
+                  guessing correctly. This model has an accuracy rate of ~<strong>55%</strong> for predicting
+                  the user correctly, with plenty of room for improving accuracy by tweaking parameters. Though
+                  not perfect, this substantial increase over "pure luck" is a great indicator of how powerful
+                  even simple deep learning algorithms can be.
+                </P>
+                <p>Notes:</p>
+  
+  
+                <ul class = "browser-default">
+  
+                  <li>There is strong evidence that this model was "overfit" on the training data. It achieved
+                    almost perfect results on the training data, and the drop was significant on the testing data.
+                    This was true even for as low as 5 epochs of training. There are known methods for 
+                    preventing this effect.
+                  </li>
+
+                  <li>A very simplistic NLP method was used for processing text data - however, the text data
+                    contains the key information for distinguishing candidates who otherwise have very similar
+                    metrics.
+                  </li>
+
+                  <li>These kinds of classification models can prove to be highly beneficial for 
+                    campaigns which aim to distinguish their messaging, which often falls into the
+                    trap of using bland or predictable talking points. For instance, the model will
+                    provide more or less certainty of whether different tweets belong to a candidate, even
+                    it the predicitons are correct. The "certainty" of a model's predictions can provide insight
+                    into whether the messaging of a tweet is distinct enough such that it clearly conveys a
+                    candidates' unique "brand". This is further helped by techniques which help identify
+                    which features of a tweet were most helpful in producing the model's predictions (LIME). These
+                    are typically unknown purely from the model itself. As a final thought, to the point of
+                    "distinct" or "predictable" branding, while this model has much room for improvement, one can see
+                    patterns in the model's predictions i.e. which candidates it incorrectly predicts, the 
+                    levels of certainty amongst different candidates, etc.
+                  </li>
+  
+                </ul> 
+              </div>
+  
+            </div> <!--card helper-panel-->
+  
+  
+        </div> <!-- ""col s3"-->
+  
+  
+      </div> <!--row section valign-wrapper hourly-weekly-container-->
+
+
+
+
+
+
+  <footer class="page-footer blue darken-4">
+    <div class = "container">
+        <div class="row">
+        <div class="col s8 offset-s2">
+            <h5 class = "white-text">Contact</h5>
+            <p class = "orange-text">tweetocracy2020@gmail.com</p>
+            <h5 class="white-text">About The Project</h5>
+            <p class="grey-text text-lighten-4">The project explores data from the Twitter accounts of 2020 candidates for the presidency of the United States.</p>
+        </div>
+
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+        Made by <span class="orange-text text-lighten-3">Eduardo Landeros</a>
+        </div>
+    </div>
+    </footer>
+
+
+    <!--  Scripts-->
+    <!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
+    <!-- <script src="../static/js/d3/d3.min.js"></script> -->
+    <script>window.twttr = (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {};
+        if (d.getElementById(id)) return t;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://platform.twitter.com/widgets.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    
+        t._e = [];
+        t.ready = function(f) {
+        t._e.push(f);
+        };
+    
+        return t;
+    }(document, "script", "twitter-wjs"));</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" charset="utf-8"></script>
+    <script src="https://unpkg.com/d3-fetch"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="../static/js/materialize.js"></script>
+    <script src="../static/js/init.js"></script>
+    <script src="../static/js/app2.js"></script>
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" charset="utf-8"></script> -->
+
+    </body>
+
+    
+</html>
