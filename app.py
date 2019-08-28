@@ -101,16 +101,16 @@ auth = OAuth1(ck, cs, at, ats)
 # Required callback_url for twitter authorization
 callback_url = "https://tweetocracy.herokuapp.com/"
 
-# payload = {
-#     'oauth_callback':callback_url
-# }
+payload = {
+    'oauth_callback':callback_url
+}
 
 # local testing
 
 # Payload object sends required callback info to twitter API
-payload = {
-    'oauth_callback':"http://127.0.0.1:5000/"
-}
+# payload = {
+#     'oauth_callback':"http://127.0.0.1:5000/"
+# }
 
 # Execute a POST/Auth request to twittier api to intitiate access
 r = requests.post('https://api.twitter.com/oauth/request_token', auth = auth, data = payload)
