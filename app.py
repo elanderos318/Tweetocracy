@@ -233,9 +233,9 @@ def filter_aged(list_element):
 
     training_data = dt.date(2019, 8, 14)
     
-    # return ((date_object <= two_days_prior) and (date_object > training_data)) 
+    return ((date_object <= two_days_prior) and (date_object > training_data)) 
 
-    return date_object > training_data
+    # return date_object > training_data
 
 # Functions for returning day, hour, month values from a datetime string
 def convert_day(date_string):
@@ -257,6 +257,8 @@ wn = nltk.WordNetLemmatizer()
 
 # Funciton for processing text data (remove punctuation, tokenization, lemmatization)
 def clean_text(text):
+    text = text.replace('&amp;', '&')
+    text = text.replace('\n', ' ')
     text = "".join([word.lower() for word in text if word not in string.punctuation])
     tokens = re.split('\W+', text)
     text = [wn.lemmatize(word) for word in tokens if word not in stopwords]
@@ -265,7 +267,12 @@ def clean_text(text):
 @app.route("/machine_learning_tweet")
 def machine_learning_tweet():
 
-    random_candidate = random.choice(candidates_list)
+    with open('jupyter_notebook_code/top_candidates.pkl', 'rb') as f:
+        top_candidates = pickle.load(f)
+
+    filtered_candidates = list(filter(lambda x: x["name"] in top_candidates, candidates_list))
+
+    random_candidate = random.choice(filtered_candidates)
     candidate_id = random_candidate["twitter_user_id"]
 
     user_get = requests.get(f'https://api.twitter.com/1.1/statuses/user_timeline.json?id={candidate_id}&count=100', params = extended_payload, auth = auth)
@@ -293,16 +300,16 @@ def machine_learning_tweet():
     ngram_vect.fit_transform(tweet_df['full_text'])
 
 
-    __location__ = os.path.dirname(os.path.realpath(__file__))
-    print(__location__)
+    # __location__ = os.path.dirname(os.path.realpath(__file__))
+    # print(__location__)
 
-    config_dir = os.path.join(__location__, "config")
-    print(config_dir)
+    # config_dir = os.path.join(__location__, "config")
+    # print(config_dir)
 
-    print(os.getcwd())
+    # print(os.getcwd())
 
     # retrieve column names from trained model
-    with open('jupyter_notebook_code/columns.pkl', 'rb') as f:
+    with open('jupyter_notebook_code/rf_columns.pkl', 'rb') as f:
         columns_list = pickle.load(f)
         
     null_list = []
@@ -325,20 +332,20 @@ def machine_learning_tweet():
         if word in X_features.keys():
             X_features[word] += 1
 
-    X_features = np.array(list(X_features.values())).reshape((1, 58604))
+    X_features = np.array(list(X_features.values())).reshape((1, 18591))
 
     X_sparse = csr_matrix(X_features)
 
-    scaler_filename = "jupyter_notebook_code/mas_scaler.save"
+    scaler_filename = "jupyter_notebook_code/rf_scaler.save"
     scaler = joblib.load(scaler_filename) 
 
     X_scaled = scaler.transform(X_sparse)
 
     encoder = LabelEncoder()
-    encoder.classes_ = np.load('jupyter_notebook_code/classes.npy', allow_pickle = True)
+    encoder.classes_ = np.load('jupyter_notebook_code/rf_classes.npy', allow_pickle = True)
 
-    model = load_model("jupyter_notebook_code/candidate_classifier.h5")
-
+    with open('jupyter_notebook_code/rf_model.sav', 'rb') as f:
+        model = pickle.load(f)
     # K.clear_session()
 
     prediction_prob = model.predict_proba(X_scaled)
@@ -354,7 +361,7 @@ def machine_learning_tweet():
 
     # sorted_json = json.dumps(sorted_top)
 
-    K.clear_session()
+    # K.clear_session()
 
     return (jsonify(**tweet_dict))
 
