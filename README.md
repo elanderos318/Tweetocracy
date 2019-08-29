@@ -26,7 +26,7 @@ The main metrics used for the graphs were Retweets and Favorites. In most cases,
 The home page displays a set of graphs which are designed with different ideas in mind - general overview of data, comparison between candidates, more detailed views on 
 specific data points, distributions, etc. A final section displays the actual tweets from candidates which earned the highest engagment numbers (because the retweet/favorite
 distributions were very highly skewed, tweets which have extreme values provide great insight into what rhetoric/style/topics demand social media attention). Much of the 
-challenge existed in creating the visualizations themselves which often differed greatly in kind. Not only did the JS code needed to change across sections, the data
+challenge existed in creating the visualizations themselves which often differed greatly in kind. Not only did the JS code need to change across sections, the data
 retrieval and modification differed on the backend too, since a variety of combinations of data types were used for filtering.
 
 Since there exist many different data points surrounding a tweet and because it is possible to retrieve tens of thousands of them, the natural next step is to try to 
@@ -38,11 +38,11 @@ NLP techinques (N-Gram/Count-Vectorizer vs TF-IDF), different types of models, h
 a final process for analyzing tweet/text data in the Flask app. I encourage a look at the jupyter notebook code, and espeically the 'Random Forest Classifier' and 'RF Model 
 Pipeline' which turned out to be used as the final machine learning application. 
 
-However, because of the actual data sized introduced as a result of the NLP, the actual model deployed online had to be modified many times, even with sparse matrices. 
+However, because of the heavy data size introduced as a result of the NLP, the actual model deployed online had to be modified many times, even with sparse matrices. 
 At first, a deep learning model with one hidden layer was trained on tens thousands of tweets with tens of thousands of different features with the aim of classifying
 'all' candidates (28). This changed to a deep learning model which was trained on the top 6 candidates and then eventually settling into a random forest model 
-which classifies tweets from the top 5 candidates. While the deep learning model delivered the best accuracy on test data, the random forest did not experience a 
-significant drop in performance, and unlike the deep learning model, it provides greater information as to what exactly contributed to the results. Also, I found
-developing the random forest and hyper-tuning paramters to be more satisfying and rewarding, though more time-consuming. Though the final application of the model in
-the app is simple (comparing user predictions and model predictions on random tweets) it is easy to see the potential application and functionality of models using
-NLP which is why it is such a fast-growing field of machine learning.
+which classifies tweets from the top 5 candidates. Even so, the final model is fairly large. While the deep learning model delivered the best accuracy on test data, 
+the random forest did not experience a significant drop in performance, and unlike the deep learning model, it provides greater information as to what exactly 
+contributed to the results. Also, I found developing the random forest and hyper-tuning paramters to be more satisfying and rewarding, though more time-consuming. 
+Though the final application of the model in the app is simple (comparing user predictions and model predictions on random tweets) it is easy to see the potential 
+application and functionality of models using NLP which is why it is such a fast-growing field of machine learning.
