@@ -11,9 +11,6 @@ from itertools import groupby
 import requests
 from requests_oauthlib import OAuth1
 
-import cryptography
-from cryptography.fernet import Fernet
-
 import pandas as pd
 import numpy as np
 import sqlalchemy
@@ -62,38 +59,6 @@ Moving_Averages = Base.classes.moving_averages
 
 
 ######
-
-# __location__ = os.path.dirname(os.path.realpath(__file__))
-# print(__location__)
-
-# config_dir = os.path.join(__location__, "config")
-# print(config_dir)
-
-# print(os.getcwd())
-
-# with open ('config/config_key.key', 'rb') as ck:
-#     fernet_key = ck.read()
-
-# with open('config/config_encrypt_1.key', 'rb') as c1:
-#     cke_e = c1.read()
-# with open('config/config_encrypt_2.key', 'rb') as c2:
-#     cse_e = c2.read()
-# with open('config/config_encrypt_3.key', 'rb') as c3:
-#     ate_e = c3.read()
-# with open('config/config_encrypt_4.key', 'rb') as c4:
-#     atse_e = c4.read()
-
-# fernet = Fernet(fernet_key)
-
-# cke_d = fernet.decrypt(cke_e)
-# cse_d = fernet.decrypt(cse_e)
-# ate_d = fernet.decrypt(ate_e)
-# atse_d = fernet.decrypt(atse_e)
-
-# ck = cke_d.decode()
-# cs = cse_d.decode()
-# at = ate_d.decode()
-# ats = atse_d.decode()
 
 ck = os.environ.get('TWITTER_API_KEY')
 cs = os.environ.get('TWITTER_API_SECRET')
