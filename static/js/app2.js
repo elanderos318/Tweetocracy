@@ -839,7 +839,7 @@ function graphMA(data) {
         })
         .classed("line", true)
         .style("stroke", (d, i) => colorBands(i))
-        .style("stroke-width", "2px")
+        .style("stroke-width", "3px")
 
     maToolTip(chartLines, metricLabel, initMetric);
     

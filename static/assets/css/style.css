@@ -95,8 +95,13 @@ font-weight: 400;
 
 .line {
     fill: none;
-    stroke-width: 2px;
+    stroke-width: 3px;
   }
+
+.line:hover {
+    fill: none;
+    stroke-width: 5px !important;
+}
 
 .aag-tooltip {
     position: absolute;
