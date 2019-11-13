@@ -463,6 +463,14 @@ def dist_init():
         filter(Tweets.created_at_date >= thirty_days_ago).\
         filter(Tweets.created_at_date <= today_date).\
         order_by(Tweets.retweet_count)
+    # print("histogram query")
+    # print(histogram_query)
+    # print("*histogram_query")
+    # print(*histogram_query)
+    # print("zip(*histogram_query)")
+    # print(zip(*histogram_query))
+    # print("list(zip(*histogram_query))")
+    # print(list(zip(*histogram_query)))
     # Query returned into a list of separate tuples, below combines all tuples into one
     [histogram_query] = list(zip(*histogram_query))
     # Create iterator
