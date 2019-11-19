@@ -1534,9 +1534,9 @@ def foo_update():
 
     session = Session(engine)
     ### Fetch Timeline Data
-    for x in range(len(candidates_list)):
+    # for x in range(len(candidates_list)):
 
-    # for x in range(14, len(candidates_list)):
+    for x in range(21, len(candidates_list)):
 
         candidate_name = candidates_list[x]['name']
         candidate_id = candidates_list[x]["twitter_user_id"]
@@ -1551,7 +1551,8 @@ def foo_update():
         # Retrieve first tweet_id that comes up for buffer_date
         ref_query = session.query(Tweets.tweet_id).\
             filter(Tweets.user_id_str == candidate_id).\
-            filter(Tweets.created_at_date <= buffer_date).first()
+            filter(Tweets.created_at_date <= buffer_date).\
+            order_by(Tweets.created_at_date.desc()).first()
         since_id_int = ref_query[0]
 
         # print(json.dumps(user_json[0], indent = 4))
@@ -1572,11 +1573,20 @@ def foo_update():
 
             user_json = user_get.json()
 
+            # print(user_json)
+
             print(f'Retrieving Data for {candidate_name}: Iteration {y}')
 
+            print(f'Ref Date: {buffer_date}')
+
+            print(f'Ref Id: {since_id_int}')
+
             for tweet in user_json:
+
+                print(tweet)
                 
                 print(candidate_name)
+
 
                 # We do not count retweets as user tweets. If retweeted_stats is true, we will continue to the next iteration
                 try:
@@ -1605,6 +1615,13 @@ def foo_update():
                 created_at_date = convert_date(created_at)
                 created_at_datetime = convert_datetime(created_at)
 
+                print(f'Tweet ID: {tweet_id}')
+
+                print(f'Ref Date: {buffer_date}')
+
+                print(f'Ref Id: {since_id_int}')
+
+
                 #Check if threshold reached
                 if tweet_id <= since_id_int:
                     threshold = True
@@ -1612,9 +1629,11 @@ def foo_update():
                 #Store 'max id variable
                 if y == 1:
                     max_id = tweet_id - 1
+                    print(f'Max Id {max_id}')
 
                 if tweet_id < max_id:
                     max_id = tweet_id -1
+                    print(f'Max Id Changed: {max_id}')
 
                 # Query the sql table and look for tweet_id_str
 
