@@ -1534,9 +1534,9 @@ def foo_update():
 
     session = Session(engine)
     ### Fetch Timeline Data
-    # for x in range(len(candidates_list)):
+    for x in range(len(candidates_list)):
 
-    for x in range(21, len(candidates_list)):
+    # for x in range(21, len(candidates_list)):
 
         candidate_name = candidates_list[x]['name']
         candidate_id = candidates_list[x]["twitter_user_id"]
